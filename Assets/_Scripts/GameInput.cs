@@ -7,10 +7,6 @@ public class GameInput : MonoBehaviour
 {
     public static GameInput Instance { get; private set; }
 
-    [Header("Player")]
-    public PlayerController player;
-    public PlayerCamera playerCamera;
-
     public event EventHandler OnJumpAction;
     public event EventHandler OnCrouchAction;
     public event EventHandler OnStandAction;
@@ -56,37 +52,16 @@ public class GameInput : MonoBehaviour
         OnJumpAction?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-
-        // Tell camera to follow transform
-        playerCamera.SetFollowTransform(player.cameraFollowPoint);
-
-        // Ignore the character's collider(s) for camera obstruction checks
-        playerCamera.IgnoredColliders.Clear();
-        playerCamera.IgnoredColliders.AddRange(player.GetComponentsInChildren<Collider>());
-    }
-
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
             Cursor.lockState = CursorLockMode.Locked;
         }
-
-        HandleCharacterInput();
     }
 
     private void LateUpdate()
     {
-        if (playerCamera.RotateWithPhysicsMover && player.Motor.AttachedRigidbody != null)
-        {
-            playerCamera.PlanarDirection = player.Motor.AttachedRigidbody.GetComponent<PhysicsMover>().RotationDeltaFromInterpolation * playerCamera.PlanarDirection;
-            playerCamera.PlanarDirection = Vector3.ProjectOnPlane(playerCamera.PlanarDirection, player.Motor.CharacterUp).normalized;
-        }
-
-        HandleCameraInput();
         GetScrollAxis();
     }
 
@@ -116,44 +91,5 @@ public class GameInput : MonoBehaviour
     public float GetScrollAxis()
     {
         return playerInputActions.Player.MouseScrollY.ReadValue<float>();
-    }
-
-    private void HandleCameraInput()
-    {
-        Vector2 look = GameInput.Instance.GetLookVector();
-
-        Vector3 lookInputVector = new Vector3(look.x / 20, look.y / 20, 0f);
-
-        // Prevent moving the camera while the cursor isn't locked
-        if (Cursor.lockState != CursorLockMode.Locked)
-        {
-            lookInputVector = Vector3.zero;
-        }
-
-        // Input for zooming the camera (disabled in WebGL because it can cause problems)
-        float scrollInput = -GameInput.Instance.GetScrollAxis() / 1000;
-
-#if UNITY_WEBGL
-        scrollInput = 0f;
-#endif
-
-        // Apply inputs to the camera
-        playerCamera.UpdateWithInput(Time.deltaTime, scrollInput, lookInputVector);
-
-        // Handle toggling zoom level
-        if (Input.GetMouseButtonDown(1))
-        {
-            playerCamera.TargetDistance = (playerCamera.TargetDistance == 0f) ? playerCamera.DefaultDistance : 0f;
-        }
-    }
-
-    private void HandleCharacterInput()
-    {
-        PlayerInputs playerInputs = new PlayerInputs();
-
-        playerInputs.CameraRotation = playerCamera.Transform.rotation;
-
-        // Apply inputs to character
-        //player.SetInputs(ref playerInputs);
     }
 }

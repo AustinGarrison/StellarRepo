@@ -1,3 +1,4 @@
+using FishNet.Demo.AdditiveScenes;
 using KinematicCharacterController;
 using KinematicCharacterController.Examples;
 using UnityEngine;
@@ -33,9 +34,6 @@ public struct PlayerInputs
 
 public class PlayerController : MonoBehaviour, ICharacterController
 {
-    public KinematicCharacterMotor Motor;
-    public PlayerCamera characterCamera;
-
 
     [Header("Stable Movement")]
     public float MaxStableMoveSpeed = 10f;
@@ -65,6 +63,9 @@ public class PlayerController : MonoBehaviour, ICharacterController
     public CharacterState CurrentCharacterState { get; private set; }
 
     //Private
+    private KinematicCharacterMotor Motor;
+    private CameraController cameraController;
+    private Camera playerCamera;
     private Collider[] _probedColliders = new Collider[8];
     private RaycastHit[] _probedHits = new RaycastHit[8];
     private Vector3 _moveInputVector;
@@ -80,40 +81,66 @@ public class PlayerController : MonoBehaviour, ICharacterController
 
     private void Awake()
     {
+        playerCamera = Camera.main;
+        cameraController = playerCamera.GetComponent<CameraController>();
+        Motor = GetComponent<KinematicCharacterMotor>();
+        
         TransitionToState(CharacterState.Default);
 
         Motor.CharacterController = this;
+        cameraController.BaseAwake();
     }
 
     private void Start()
     {
+
         GameInput.Instance.OnJumpAction += GameInput_OnJumpAction;
         GameInput.Instance.OnCrouchAction += GameInput_OnCrouchAction;
         GameInput.Instance.OnStandAction += GameInput_OnStandAction;
+
+        Cursor.lockState = CursorLockMode.Locked;
+
+        // Tell camera to follow transform
+        cameraController.SetFollowTransform(cameraFollowPoint);
+
+        // Ignore the character's collider(s) for camera obstruction checks
+        cameraController.IgnoredColliders.Clear();
+        cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
     }
 
     private void Update()
     {
-        //if (!IsOwner)
-        //{
-        //    enabled = false;
-        //    return;
-        //}
-
         HandleMovement();
         HandleInteractions();
+        HandleCharacterInput();
     }
 
+    private void LateUpdate()
+    {
+        if (cameraController.RotateWithPhysicsMover && Motor.AttachedRigidbody != null)
+        {
+            cameraController.PlanarDirection = Motor.AttachedRigidbody.GetComponent<PhysicsMover>().RotationDeltaFromInterpolation * cameraController.PlanarDirection;
+            cameraController.PlanarDirection = Vector3.ProjectOnPlane(cameraController.PlanarDirection, Motor.CharacterUp).normalized;
+        }
+    }
+
+
+    private void HandleCharacterInput()
+    {
+        PlayerInputs playerInputs = new PlayerInputs();
+
+        playerInputs.CameraRotation = cameraController.Transform.rotation;
+    }
 
     public void HandleMovement()
     {
         Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
         Vector3 moveInputVector = new Vector3(inputVector.x, 0, inputVector.y);
 
-        Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(characterCamera.Transform.rotation * Vector3.forward, Motor.CharacterUp).normalized;
+        Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(cameraController.Transform.rotation * Vector3.forward, Motor.CharacterUp).normalized;
         if (cameraPlanarDirection.sqrMagnitude == 0f)
         {
-            cameraPlanarDirection = Vector3.ProjectOnPlane(characterCamera.Transform.rotation * Vector3.up, Motor.CharacterUp).normalized;
+            cameraPlanarDirection = Vector3.ProjectOnPlane(cameraController.Transform.rotation * Vector3.up, Motor.CharacterUp).normalized;
         }
         Quaternion cameraPlanarRotation = Quaternion.LookRotation(cameraPlanarDirection, Motor.CharacterUp);
 

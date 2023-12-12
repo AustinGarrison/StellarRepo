@@ -1,11 +1,12 @@
+using FishNet.Example.ColliderRollbacks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCamera : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
     [Header("Framing")]
-    public Camera Camera;
+    private Camera Camera;
     public Vector2 FollowPointFraming = new Vector2(0f, 0f);
     public float FollowingSharpness = 10000f;
 
@@ -58,9 +59,10 @@ public class PlayerCamera : MonoBehaviour
         DefaultVerticalAngle = Mathf.Clamp(DefaultVerticalAngle, MinVerticalAngle, MaxVerticalAngle);
     }
 
-    void Awake()
+    internal void BaseAwake()
     {
         Transform = this.transform;
+        Camera = gameObject.GetComponent<Camera>();
 
         _currentDistance = DefaultDistance;
         TargetDistance = _currentDistance;
@@ -68,6 +70,40 @@ public class PlayerCamera : MonoBehaviour
         _targetVerticalAngle = 0f;
 
         PlanarDirection = Vector3.forward;
+    }
+
+    private void LateUpdate()
+    {
+        HandleCameraInput();
+    }
+
+    private void HandleCameraInput()
+    {
+        Vector2 look = GameInput.Instance.GetLookVector();
+
+        Vector3 lookInputVector = new Vector3(look.x / 20, look.y / 20, 0f);
+
+        // Prevent moving the camera while the cursor isn't locked
+        if (Cursor.lockState != CursorLockMode.Locked)
+        {
+            lookInputVector = Vector3.zero;
+        }
+
+        // Input for zooming the camera (disabled in WebGL because it can cause problems)
+        float scrollInput = -GameInput.Instance.GetScrollAxis() / 1000;
+
+#if UNITY_WEBGL
+        scrollInput = 0f;
+#endif
+
+        // Apply inputs to the camera
+        UpdateWithInput(Time.deltaTime, scrollInput, lookInputVector);
+
+        // Handle toggling zoom level
+        if (Input.GetMouseButtonDown(1))
+        {
+            TargetDistance = (TargetDistance == 0f) ? DefaultDistance : 0f;
+        }
     }
 
     // Set the transform that the camera will orbit around

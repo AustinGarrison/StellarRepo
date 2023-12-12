@@ -42098,13 +42098,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5572022742420398803}
-  m_LocalRotation: {x: 0.12250419, y: -0.6971787, z: 0.12278383, w: 0.6955995}
-  m_LocalPosition: {x: 1.068717, y: 3.531858, z: -10.3055}
+  m_LocalRotation: {x: 0.17344485, y: -0.0011166335, z: 0.00019773097, w: 0.98484296}
+  m_LocalPosition: {x: -48.4955, y: 3.611858, z: -29.188717}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6505057340831361182}
-  m_RootOrder: 0
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 19.976, y: -0.13, z: 0}
 --- !u!114 &5573864683772550980
 MonoBehaviour:
@@ -42118,7 +42118,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94b1bd222ce31d34fafd17f61893c5ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Camera: {fileID: 5553693056096936871}
+  MaxStableMoveSpeed: 10
+  StableMovementSharpness: 15
+  OrientationSharpness: 10
+  OrientationMethod: 0
+  MaxAirMoveSpeed: 15
+  AirAccelerationSpeed: 15
+  Drag: 0.1
+  JumpUpSpeed: 10
+  JumpScalableForwardSpeed: 10
+  JumpPreGroundingGraceTime: 0
+  JumpPostGroundingGraceTime: 0
+  AdditionalOrientationMethod: 0
+  AdditionalOrientationSharpness: 10
+  Gravity: {x: 0, y: -30, z: 0}
+  MeshRoot: {fileID: 0}
+  cameraFollowPoint: {fileID: 0}
+  CrouchedCapsuleHeight: 1
+  Motor: {fileID: 0}
   FollowPointFraming: {x: 0, y: 0}
   FollowingSharpness: 1e+9
   DefaultDistance: 6
@@ -42301,7 +42318,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5573864683772550979}
   - {fileID: 6509949385530125624}
   m_Father: {fileID: 0}
   m_RootOrder: 4
@@ -42441,7 +42457,7 @@ Transform:
   - {fileID: 6510422302040278518}
   - {fileID: 6505238199867825826}
   m_Father: {fileID: 6505057340831361182}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6509949385530125627
 GameObject:
@@ -42558,8 +42574,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ac2c268b4157fd41981a4880930dbe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Motor: {fileID: 6615662580611611646}
-  characterCamera: {fileID: 5573864683772550980}
   MaxStableMoveSpeed: 10
   StableMovementSharpness: 15
   OrientationSharpness: 200
@@ -42577,6 +42591,7 @@ MonoBehaviour:
   MeshRoot: {fileID: 6510422302040278518}
   cameraFollowPoint: {fileID: 6505238199867825826}
   CrouchedCapsuleHeight: 1
+  Motor: {fileID: 6615662580611611646}
 --- !u!114 &6615662580611611648
 MonoBehaviour:
   m_ObjectHideFlags: 0
