@@ -1,4 +1,5 @@
 using FishNet.Demo.AdditiveScenes;
+using FishNet.Object;
 using KinematicCharacterController;
 using KinematicCharacterController.Examples;
 using UnityEngine;
@@ -32,7 +33,7 @@ public struct PlayerInputs
 
 }
 
-public class PlayerController : MonoBehaviour, ICharacterController
+public class PlayerController : NetworkBehaviour, ICharacterController
 {
 
     [Header("Stable Movement")]
@@ -79,49 +80,82 @@ public class PlayerController : MonoBehaviour, ICharacterController
     private bool _shouldBeCrouching = false;
     private bool _isCrouching = false;
 
+
     private void Awake()
     {
-        playerCamera = Camera.main;
-        cameraController = playerCamera.GetComponent<CameraController>();
         Motor = GetComponent<KinematicCharacterMotor>();
         
         TransitionToState(CharacterState.Default);
 
         Motor.CharacterController = this;
-        cameraController.BaseAwake();
     }
 
-    private void Start()
-    {
-
+    private void Start() 
+    { 
         GameInput.Instance.OnJumpAction += GameInput_OnJumpAction;
         GameInput.Instance.OnCrouchAction += GameInput_OnCrouchAction;
         GameInput.Instance.OnStandAction += GameInput_OnStandAction;
 
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
+    }
 
-        // Tell camera to follow transform
-        cameraController.SetFollowTransform(cameraFollowPoint);
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
 
-        // Ignore the character's collider(s) for camera obstruction checks
-        cameraController.IgnoredColliders.Clear();
-        cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
+        Debug.Log("Client Start");
+        
+        if(base.IsOwner)
+        {
+            playerCamera = Camera.main;
+            cameraController = playerCamera.GetComponent<CameraController>();
+            cameraController.BaseAwake();
+
+            // Tell camera to follow transform
+            cameraController.SetFollowTransform(cameraFollowPoint);    
+            
+            // Ignore the character's collider(s) for camera obstruction checks
+            cameraController.IgnoredColliders.Clear();
+            cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
+        }
+        else
+        {
+            this.enabled = false;
+            Motor.enabled = false;
+        }
     }
 
     private void Update()
     {
+        if(!base.IsOwner || playerCamera == null)
+        {
+            return;
+        }
+
         HandleMovement();
         HandleInteractions();
         HandleCharacterInput();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     private void LateUpdate()
     {
+        if (!base.IsOwner)
+        {
+            return;
+        }
+
         if (cameraController.RotateWithPhysicsMover && Motor.AttachedRigidbody != null)
         {
             cameraController.PlanarDirection = Motor.AttachedRigidbody.GetComponent<PhysicsMover>().RotationDeltaFromInterpolation * cameraController.PlanarDirection;
             cameraController.PlanarDirection = Vector3.ProjectOnPlane(cameraController.PlanarDirection, Motor.CharacterUp).normalized;
         }
+
+        cameraController.HandleCameraInput();
     }
 
 

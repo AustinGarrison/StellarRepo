@@ -1,9 +1,10 @@
 using FishNet.Example.ColliderRollbacks;
+using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
     [Header("Framing")]
     private Camera Camera;
@@ -72,12 +73,7 @@ public class CameraController : MonoBehaviour
         PlanarDirection = Vector3.forward;
     }
 
-    private void LateUpdate()
-    {
-        HandleCameraInput();
-    }
-
-    private void HandleCameraInput()
+    public void HandleCameraInput()
     {
         Vector2 look = GameInput.Instance.GetLookVector();
 

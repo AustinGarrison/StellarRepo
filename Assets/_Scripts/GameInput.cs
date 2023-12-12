@@ -52,14 +52,6 @@ public class GameInput : MonoBehaviour
         OnJumpAction?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-    }
-
     private void LateUpdate()
     {
         GetScrollAxis();
