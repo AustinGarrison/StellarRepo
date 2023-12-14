@@ -52,11 +52,6 @@ public class GameInput : MonoBehaviour
         OnJumpAction?.Invoke(this, EventArgs.Empty);
     }
 
-    private void LateUpdate()
-    {
-        GetScrollAxis();
-    }
-
     private void OnDestroy()
     {
 

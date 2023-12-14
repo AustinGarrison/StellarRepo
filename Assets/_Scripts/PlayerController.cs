@@ -66,6 +66,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
     //Private
     private KinematicCharacterMotor Motor;
     private CameraController cameraController;
+    private InventoryController inventoryController;
     private Camera playerCamera;
     private Collider[] _probedColliders = new Collider[8];
     private RaycastHit[] _probedHits = new RaycastHit[8];
@@ -110,6 +111,8 @@ public class PlayerController : NetworkBehaviour, ICharacterController
             playerCamera = Camera.main;
             cameraController = playerCamera.GetComponent<CameraController>();
             cameraController.BaseAwake();
+
+            inventoryController = GetComponent<InventoryController>();
 
             // Tell camera to follow transform
             cameraController.SetFollowTransform(cameraFollowPoint);    
@@ -201,7 +204,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     private void HandleInteractions()
     {
-
+        inventoryController.HandleInteraction();
     }
 
     private void GameInput_OnCrouchAction(object sender, System.EventArgs e)

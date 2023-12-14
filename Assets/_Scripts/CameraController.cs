@@ -86,7 +86,8 @@ public class CameraController : NetworkBehaviour
         }
 
         // Input for zooming the camera (disabled in WebGL because it can cause problems)
-        float scrollInput = -GameInput.Instance.GetScrollAxis() / 1000;
+        //float scrollInput = -GameInput.Instance.GetScrollAxis() / 1000;
+        float scrollInput = 0;
 
 #if UNITY_WEBGL
         scrollInput = 0f;
