@@ -27,7 +27,7 @@ public class InventoryController : NetworkBehaviour
             return;
         }
 
-        _cameraTransform = Camera.main.transform;
+        //_cameraTransform = Camera.main.transform;
     }
 
     private const int MinValue = 1;

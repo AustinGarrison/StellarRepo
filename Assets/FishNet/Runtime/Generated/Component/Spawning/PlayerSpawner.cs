@@ -1,6 +1,7 @@
 ﻿using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Object;
+using PlasticPipe.PlasticProtocol.Messages;
 using System;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -100,7 +101,7 @@ namespace FishNet.Component.Spawning
 
             NetworkObject nob = _networkManager.GetPooledInstantiated(_playerPrefab, position, rotation, true);
             _networkManager.ServerManager.Spawn(nob, conn);
-
+            
             //If there are no global scenes 
             if (_addToDefaultScene)
                 _networkManager.SceneManager.AddOwnerToDefaultScene(nob);

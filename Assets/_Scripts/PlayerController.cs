@@ -1,3 +1,4 @@
+using FishNet.Component.Spawning;
 using FishNet.Demo.AdditiveScenes;
 using FishNet.Object;
 using KinematicCharacterController;
@@ -80,6 +81,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
     private Vector3 _internalVelocityAdd = Vector3.zero;
     private bool _shouldBeCrouching = false;
     private bool _isCrouching = false;
+    private bool initialized = false;
 
 
     private void Awake()
@@ -93,33 +95,18 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     private void Start() 
     { 
-        GameInput.Instance.OnJumpAction += GameInput_OnJumpAction;
-        GameInput.Instance.OnCrouchAction += GameInput_OnCrouchAction;
-        GameInput.Instance.OnStandAction += GameInput_OnStandAction;
 
         //Cursor.lockState = CursorLockMode.Locked;
     }
 
+
     public override void OnStartClient()
     {
         base.OnStartClient();
-
-        Debug.Log("Client Start");
         
         if(base.IsOwner)
         {
-            playerCamera = Camera.main;
-            cameraController = playerCamera.GetComponent<CameraController>();
-            cameraController.BaseAwake();
 
-            inventoryController = GetComponent<InventoryController>();
-
-            // Tell camera to follow transform
-            cameraController.SetFollowTransform(cameraFollowPoint);    
-            
-            // Ignore the character's collider(s) for camera obstruction checks
-            cameraController.IgnoredColliders.Clear();
-            cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
         }
         else
         {
@@ -128,9 +115,31 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         }
     }
 
+    internal void Init()
+    {
+        GameInput.Instance.OnJumpAction += GameInput_OnJumpAction;
+        GameInput.Instance.OnCrouchAction += GameInput_OnCrouchAction;
+        GameInput.Instance.OnStandAction += GameInput_OnStandAction;
+
+        playerCamera = Camera.main;
+        cameraController = playerCamera.GetComponent<CameraController>();
+        cameraController.BaseAwake();
+
+        inventoryController = GetComponent<InventoryController>();
+
+        // Tell camera to follow transform
+        cameraController.SetFollowTransform(cameraFollowPoint);
+
+        // Ignore the character's collider(s) for camera obstruction checks
+        cameraController.IgnoredColliders.Clear();
+        cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
+
+        initialized = true;
+    }
+
     private void Update()
     {
-        if(!base.IsOwner || playerCamera == null)
+        if(!base.IsOwner || initialized == false)
         {
             return;
         }
@@ -147,7 +156,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     private void LateUpdate()
     {
-        if (!base.IsOwner)
+        if (!base.IsOwner || initialized == false)
         {
             return;
         }
