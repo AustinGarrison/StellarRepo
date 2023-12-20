@@ -1,7 +1,10 @@
 using FishNet.Component.Spawning;
 using Steamworks;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +16,7 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI lobbyTitleText, lobbyIDText;
     [SerializeField] private Button startGameButton;
 
-    public static event EventHandler OnGameLaunched;
+    public static event EventHandler OnLobbyInit;
 
     private void Awake() => Instance = this;
 
@@ -25,6 +28,7 @@ public class MainMenuManager : MonoBehaviour
     public void CreateLobby()
     {
         BootstrapManager.CreateLobby();
+        OnLobbyInit?.Invoke(this, EventArgs.Empty);
     }
 
     public void OpenMainMenu()
@@ -49,6 +53,7 @@ public class MainMenuManager : MonoBehaviour
         Instance.OpenLobby();
     }
 
+
     void CloseAllScreens()
     {
         menuScreen.SetActive(false);
@@ -57,8 +62,10 @@ public class MainMenuManager : MonoBehaviour
 
     public void JoinLobby()
     {
+
         CSteamID steamID = new CSteamID(Convert.ToUInt64(lobbyInput.text));
         BootstrapManager.JoinByID(steamID);
+        OnLobbyInit?.Invoke(this, EventArgs.Empty);
     }
 
     public void LeaveLobby()
@@ -69,8 +76,7 @@ public class MainMenuManager : MonoBehaviour
     public void StartGame()
     {
         string[] scenesToClose = new string[] { "MenuSceneSteam" };
-        BootstrapNetworkManager.ChangeNetworkScene("SteamGameScene", scenesToClose);
-        OnGameLaunched?.Invoke(this, EventArgs.Empty);
+        BootstrapNetworkManager.ChangeNetworkSceneMain("SteamGameScene", scenesToClose);
     }
 
     public void GetPlayer()

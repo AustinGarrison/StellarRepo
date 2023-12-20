@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2669254613460341116}
   - component: {fileID: 8154127043523862247}
-  - component: {fileID: 7532109466835567127}
   m_Layer: 0
   m_Name: NewClient
   m_TagString: Untagged
@@ -65,15 +64,3 @@ MonoBehaviour:
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 12089553451739031304
---- !u!114 &7532109466835567127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4220651728552470707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22b6ada9069ac43499b91103b5cc244a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

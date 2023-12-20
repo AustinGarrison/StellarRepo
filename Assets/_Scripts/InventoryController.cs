@@ -27,13 +27,17 @@ public class InventoryController : NetworkBehaviour
             return;
         }
 
-        //_cameraTransform = Camera.main.transform;
     }
 
     private const int MinValue = 1;
     private const int MaxValue = 5;
 
     private int currentValue = 1;
+
+    internal void Init()
+    {
+        _cameraTransform = Camera.main.transform;
+    }
 
     internal void HandleInteraction()
     {

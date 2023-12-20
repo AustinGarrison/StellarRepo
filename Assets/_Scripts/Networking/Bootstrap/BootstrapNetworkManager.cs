@@ -2,6 +2,7 @@ using FishNet.Connection;
 using FishNet.Managing.Scened;
 using FishNet.Object;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +15,29 @@ public class BootstrapNetworkManager : NetworkBehaviour
 
     private void Awake() => instance = this;
 
-    public static void ChangeNetworkScene(string sceneName, string[] scenesToClose)
+    public static event EventHandler OnGameStarted;
+
+    public static void ChangeNetworkSceneMain(string sceneName, string[] scenesToClose)
     {
         instance.CloseScenesServer(scenesToClose);
 
         SceneLoadData sld = new SceneLoadData(sceneName);
         NetworkConnection[] conns = instance.ServerManager.Clients.Values.ToArray();
         instance.SceneManager.LoadConnectionScenes(conns, sld);
+        instance.EnterGameSceneServer();
+        OnGameStarted?.Invoke(instance, EventArgs.Empty);
+
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void EnterGameSceneServer()
+    {
+        EnterGameSceneObserver();
+    }
+
+    [ObserversRpc]
+    void EnterGameSceneObserver()
+    {
 
     }
 

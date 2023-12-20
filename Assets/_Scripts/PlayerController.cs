@@ -1,6 +1,7 @@
 using FishNet.Component.Spawning;
 using FishNet.Demo.AdditiveScenes;
 using FishNet.Object;
+using GameKit.Dependencies.Utilities.Types;
 using KinematicCharacterController;
 using KinematicCharacterController.Examples;
 using UnityEngine;
@@ -86,6 +87,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     private void Awake()
     {
+        Debug.Log("First");
         Motor = GetComponent<KinematicCharacterMotor>();
         
         TransitionToState(CharacterState.Default);
@@ -93,30 +95,34 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         Motor.CharacterController = this;
     }
 
-    private void Start() 
-    { 
-
-        //Cursor.lockState = CursorLockMode.Locked;
+    private void BootstrapNetworkManager_OnGameStarted(object sender, System.EventArgs e)
+    {
+        Init();
+        Motor.enabled = true;
     }
-
 
     public override void OnStartClient()
     {
+        Debug.Log("Second");
         base.OnStartClient();
         
-        if(base.IsOwner)
+        if(!base.IsOwner)
         {
-
+            Debug.Log("Third - Not Owner");
+            this.enabled = false;
+            Motor.enabled = false;
+            return;
         }
         else
         {
-            this.enabled = false;
-            Motor.enabled = false;
+            Debug.Log("Third - Owner");
+            BootstrapNetworkManager.OnGameStarted += BootstrapNetworkManager_OnGameStarted;
         }
     }
 
     internal void Init()
     {
+        Debug.Log("Forth");
         GameInput.Instance.OnJumpAction += GameInput_OnJumpAction;
         GameInput.Instance.OnCrouchAction += GameInput_OnCrouchAction;
         GameInput.Instance.OnStandAction += GameInput_OnStandAction;
@@ -126,6 +132,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         cameraController.BaseAwake();
 
         inventoryController = GetComponent<InventoryController>();
+        inventoryController.Init();
 
         // Tell camera to follow transform
         cameraController.SetFollowTransform(cameraFollowPoint);
