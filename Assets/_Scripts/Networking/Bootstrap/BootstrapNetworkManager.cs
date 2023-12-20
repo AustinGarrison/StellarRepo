@@ -25,7 +25,6 @@ public class BootstrapNetworkManager : NetworkBehaviour
         NetworkConnection[] conns = instance.ServerManager.Clients.Values.ToArray();
         instance.SceneManager.LoadConnectionScenes(conns, sld);
         instance.EnterGameSceneServer();
-        OnGameStarted?.Invoke(instance, EventArgs.Empty);
 
     }
 
@@ -39,6 +38,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
     void EnterGameSceneObserver()
     {
 
+        OnGameStarted?.Invoke(instance, EventArgs.Empty);
     }
 
     [ServerRpc(RequireOwnership = false)]
