@@ -25,6 +25,14 @@ public class MainMenuManager : MonoBehaviour
         OpenMainMenu();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F10))
+        {
+            StartGame();
+        }
+    }
+
     public void CreateLobby()
     {
         BootstrapManager.CreateLobby();
@@ -62,7 +70,6 @@ public class MainMenuManager : MonoBehaviour
 
     public void JoinLobby()
     {
-
         CSteamID steamID = new CSteamID(Convert.ToUInt64(lobbyInput.text));
         BootstrapManager.JoinByID(steamID);
         OnLobbyInit?.Invoke(this, EventArgs.Empty);
@@ -75,6 +82,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartGame()
     {
+        Debug.Log("Start Game");
         string[] scenesToClose = new string[] { "MenuSceneSteam" };
         BootstrapNetworkManager.ChangeNetworkSceneMain("SteamGameScene", scenesToClose);
     }

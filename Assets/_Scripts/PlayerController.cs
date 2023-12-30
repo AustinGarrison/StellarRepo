@@ -68,7 +68,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
     //Private
     private KinematicCharacterMotor Motor;
     private CameraController cameraController;
-    private InventoryController inventoryController;
+    private InteractController inventoryController;
     private Camera playerCamera;
     private Collider[] _probedColliders = new Collider[8];
     private RaycastHit[] _probedHits = new RaycastHit[8];
@@ -87,7 +87,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     private void Awake()
     {
-        Debug.Log("First");
         Motor = GetComponent<KinematicCharacterMotor>();
         
         TransitionToState(CharacterState.Default);
@@ -103,26 +102,28 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     public override void OnStartClient()
     {
-        Debug.Log("Second");
         base.OnStartClient();
         
         if(!base.IsOwner)
         {
-            Debug.Log("Third - Not Owner");
             this.enabled = false;
             Motor.enabled = false;
             return;
         }
         else
         {
-            Debug.Log("Third - Owner");
             BootstrapNetworkManager.OnGameStarted += BootstrapNetworkManager_OnGameStarted;
         }
     }
 
+    public void DebugInit()
+    {
+        Init();
+        Motor.enabled = true;
+    }
+
     internal void Init()
     {
-        Debug.Log("Forth");
         GameInput.Instance.OnJumpAction += GameInput_OnJumpAction;
         GameInput.Instance.OnCrouchAction += GameInput_OnCrouchAction;
         GameInput.Instance.OnStandAction += GameInput_OnStandAction;
@@ -131,7 +132,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         cameraController = playerCamera.GetComponent<CameraController>();
         cameraController.BaseAwake();
 
-        inventoryController = GetComponent<InventoryController>();
+        inventoryController = GetComponent<InteractController>();
         inventoryController.Init();
 
         // Tell camera to follow transform
@@ -144,6 +145,8 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         initialized = true;
     }
 
+
+
     private void Update()
     {
         if(!base.IsOwner || initialized == false)
@@ -152,13 +155,12 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         }
 
         HandleMovement();
-        HandleInteractions();
         HandleCharacterInput();
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-        }
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    Cursor.lockState = CursorLockMode.Locked;
+        //}
     }
 
     private void LateUpdate()
@@ -216,11 +218,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
                 break;
         }
 
-    }
-
-    private void HandleInteractions()
-    {
-        inventoryController.HandleInteraction();
     }
 
     private void GameInput_OnCrouchAction(object sender, System.EventArgs e)

@@ -10,6 +10,9 @@ public class GameInput : MonoBehaviour
     public event EventHandler OnJumpAction;
     public event EventHandler OnCrouchAction;
     public event EventHandler OnStandAction;
+    public event EventHandler OnInteractAction;
+    public event EventHandler OnAltInteractAction;
+    public event EventHandler OnInventoryToggled;
 
     public enum Binding
     {
@@ -31,10 +34,28 @@ public class GameInput : MonoBehaviour
         playerInputActions.Player.Enable();
 
         playerInputActions.Player.Jump.performed += Jump_performed;
+        playerInputActions.Player.Interact.performed += Interact_performed;
+        playerInputActions.Player.AltInteract.performed += AltInteract_performed;
         playerInputActions.Player.Crouch.performed += Crouch_performed;
         playerInputActions.Player.Crouch.canceled += Crouch_canceled;
+        playerInputActions.Player.InventoryToggle.performed += InventoryToggle_performed;
+
     }
 
+    private void Jump_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnJumpAction?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Interact_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnInteractAction?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void AltInteract_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnAltInteractAction?.Invoke(this, EventArgs.Empty);
+    }
 
     private void Crouch_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
@@ -46,18 +67,19 @@ public class GameInput : MonoBehaviour
         OnStandAction?.Invoke(this, EventArgs.Empty);
     }
 
-
-    private void Jump_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    private void InventoryToggle_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        OnJumpAction?.Invoke(this, EventArgs.Empty);
+        OnInventoryToggled?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnDestroy()
     {
-
         playerInputActions.Player.Jump.performed -= Jump_performed;
+        playerInputActions.Player.Interact.performed -= Interact_performed;
+        playerInputActions.Player.AltInteract.performed -= Interact_performed;
         playerInputActions.Player.Crouch.performed -= Crouch_performed;
         playerInputActions.Player.Crouch.canceled -= Crouch_canceled;
+        playerInputActions.Player.InventoryToggle.performed -= InventoryToggle_performed;
 
         playerInputActions.Dispose();
     }
