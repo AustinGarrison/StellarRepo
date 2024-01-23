@@ -1,5 +1,7 @@
-using System;
-using System.Runtime.InteropServices.WindowsRuntime;
+
+using Newtonsoft.Json.Bson;
+using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
@@ -7,6 +9,7 @@ public class Universe
 {
     public enum MoveChunkDir
     {
+        None,
         North,
         South,
         East,
@@ -26,13 +29,13 @@ public class Universe
     int numChunksX, numChunksY;
 
 
-    public Universe(SerializedChunks activeChunksList, int numberOfSectorsXY, int sectorGUISize, int numChunkX, int numChunkY, SpawnType spawnType)
+    public Universe(SerializedChunks activeChunksList, int numChunkXY, int numberOfSectorsXY, int sectorGUISize,  SpawnType spawnType)
     {
         this.activeChunksList = activeChunksList;
         this.numberOfSectorsXY = numberOfSectorsXY;
         this.sectorGUISize = sectorGUISize;
-        this.numChunksX = numChunkX;
-        this.numChunksY = numChunkY;
+        this.numChunksX = numChunkXY;
+        this.numChunksY = numChunkXY;
         type = spawnType;
 
         currentCenterChunkX = 0;
@@ -50,22 +53,28 @@ public class Universe
     {
         if (activeChunksList != null && activeChunksList._activeChunks != null)
         {
-            GenerateChunks(true);
+            for (int x = 0; x < activeChunksList._activeChunks.GetLength(0); x++)
+            {
+                for (int y = 0; y < activeChunksList._activeChunks.GetLength(1); y++)
+                {
+                    SetupChunk(x, y);
+                }
+            }
         }
     }
 
-    public void MoveChunks(MoveChunkDir newDir)
+    public void MoveChunks(MoveChunkDir newDirection)
     {
         visibleShipsTextParent = new GameObject("UniverseTextParent");
 
-        switch (newDir)
+        switch (newDirection)
         {
             case MoveChunkDir.North:
                 currentCenterChunkY += 1;
                 break;
             case MoveChunkDir.South:
                 currentCenterChunkY -= 1;
-                break;
+                break; 
             case MoveChunkDir.East:
                 currentCenterChunkX += 1;
                 break;
@@ -74,41 +83,201 @@ public class Universe
                 break;
         }
 
-        GenerateChunks(true);
+        GenerateNewChunks(newDirection);
     }
 
-    private void GenerateChunks(bool startingChunks)
+    private void GenerateNewChunks(MoveChunkDir direction)
     {
-        if (activeChunksList != null && activeChunksList._activeChunks != null)
+        UniverseChunk[,] oldChunks = activeChunksList._activeChunks;
+
+        int arrayLength = -1;
+
+        // Get length or height
+        if (direction == MoveChunkDir.North || direction == MoveChunkDir.South)
         {
-            for (int localPosX = 0; localPosX < activeChunksList._activeChunks.GetLength(0); localPosX++)
-            {
-                for (int localPosY = 0; localPosY < activeChunksList._activeChunks.GetLength(1); localPosY++)
+            arrayLength = activeChunksList._activeChunks.GetLength(0);
+        }
+        else if (direction == MoveChunkDir.East || direction == MoveChunkDir.West)
+        {
+            arrayLength = activeChunksList._activeChunks.GetLength(1);
+        }
+
+        // Shift all rows or columns
+        oldChunks = ShiftKeptChunks(direction, arrayLength, oldChunks);
+
+        // Remove remove row or column that is going to be regenerated
+        // Sould this even matter? They are being overwritten anyway?
+        //oldChunks = RemoveOverwriteChunks(direction, arrayLength, oldChunks);
+
+        // Set universe array to new array
+        activeChunksList._activeChunks = oldChunks;
+
+        // Generate the new chunks
+        if (direction == MoveChunkDir.North || direction == MoveChunkDir.South)
+        {
+            NewChunksVertical(direction, arrayLength);
+        }
+        else if (direction == MoveChunkDir.East || direction == MoveChunkDir.West)
+        {
+            NewChunksHorizontal(direction, arrayLength);
+        }
+    }
+
+    private UniverseChunk[,] RemoveOverwriteChunks(MoveChunkDir direction, int arrayLength, UniverseChunk[,] chunksArray)
+    {
+        switch (direction)
+        {
+            case MoveChunkDir.North:
+
+                for (int x = 0; x < arrayLength; x++)
                 {
-                    //UniverseChunk newUniverseChunk = new UniverseChunk
+                    chunksArray[x, 0] = null;
+                }
+                break;
 
-                    activeChunksList._activeChunks[localPosX, localPosY].SetupChunk(
+            case MoveChunkDir.South:
 
-                        // Global Positions
-                        //(UInt32)localPosX + currentCenterChunkX,
-                        localPosX + currentCenterChunkX,
-                        localPosY + currentCenterChunkY,
+                for (int x = 0; x < arrayLength; x++)
+                {
+                    chunksArray[x, arrayLength - 1] = null;
+                }
+                break;
 
-                        // Local Positions
-                        localPosX,
-                        localPosY,
-                        numberOfSectorsXY,
-                        sectorGUISize,
-                        out bool chunkHasShip);
+            case MoveChunkDir.East:
+                for (int y = 0; y < arrayLength; y++)
+                {
+                    chunksArray[arrayLength - 1, y] = null;
+                }
+                break;
 
+            case MoveChunkDir.West:
 
-                    if (startingChunks && chunkHasShip)
+                for (int y = 0; y < arrayLength; y++)
+                {
+                    chunksArray[0, y] = null;
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        return chunksArray;
+    }
+
+    private UniverseChunk[,] ShiftKeptChunks(MoveChunkDir direction, int arrayLength, UniverseChunk[,] chunksArray)
+    {
+        switch (direction)
+        {
+            case MoveChunkDir.North:
+
+                for (int y = 0; y < arrayLength - 1; y++)
+                {
+                    for (int x = 0; x < arrayLength; x++)
                     {
-                        // Render the chunks to the screen
-                        ChunkVisuals(activeChunksList._activeChunks[localPosX, localPosY]);
+                        chunksArray[x, y] = chunksArray[x, y + 1];
+                        chunksArray[x, y].globalPositionY += 1;
                     }
                 }
-            }
+                break;
+
+            case MoveChunkDir.South:
+
+                for (int y = arrayLength - 1; y > 0; y--)
+                {
+                    for (int x = 0; x < arrayLength; x++)
+                    {
+                        chunksArray[x, y] = chunksArray[x, y - 1];
+                        chunksArray[x, y].globalPositionY -= 1;
+                    }
+                }
+                break;
+
+            case MoveChunkDir.East:
+
+                for (int x = 0; x < arrayLength - 1; x++)
+                {
+                    for (int y = 0; y < arrayLength; y++)
+                    {
+                        chunksArray[x, y].sectorsArray = chunksArray[x + 1, y].sectorsArray;
+                        chunksArray[x, y].globalPositionX += 1;
+                    }
+                }
+                break;
+
+            case MoveChunkDir.West:
+
+                for (int x = arrayLength - 1; x > 0; x--)
+                {
+                    for (int y = 0; y < arrayLength; y++)
+                    {
+                        chunksArray[x, y].sectorsArray = chunksArray[x - 1, y].sectorsArray;
+                        chunksArray[x, y].globalPositionX -= 1;
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        return chunksArray;
+    }
+
+    private void NewChunksHorizontal(MoveChunkDir direction, int arrayLength )
+    {        
+        // Will either be 0 or 4
+        int x = NewChunkSectionValue(direction, arrayLength);
+
+        // We moved right or left, so create new chunks on the Y axis
+        for (int y = 0; y < arrayLength; y++)
+            SetupChunk(x, y);
+        
+    }
+
+    private void NewChunksVertical(MoveChunkDir direction, int arrayLength)
+    {
+        // Will either be 0 or 4
+        int y = NewChunkSectionValue(direction, arrayLength);
+
+        // We moved up or down, so create new chunks on the X axis
+        for (int x = 0; x < arrayLength; x++)
+            SetupChunk(x, y);
+    }
+
+    private int NewChunkSectionValue(MoveChunkDir direction, int arrayLength)
+    {
+        int sectionValue = -1;
+
+        if (direction == MoveChunkDir.West || direction == MoveChunkDir.South)
+            sectionValue = 0;
+        else if (direction == MoveChunkDir.East || direction == MoveChunkDir.North)
+            sectionValue = arrayLength - 1;
+
+        return sectionValue;
+    }
+
+    private void SetupChunk(int x, int y)
+    {
+        activeChunksList._activeChunks[x, y].SetupChunk(
+
+            // Global Positions
+            x + currentCenterChunkX,
+            y + currentCenterChunkY,
+
+            // Local Positions, 
+            x,
+            y,
+            numberOfSectorsXY,
+
+            // Settings
+            sectorGUISize,
+            out bool chunkHasShip);
+
+        if (chunkHasShip)
+        {
+            // Render the chunks to the screen, Only generates one row/column 
+            ChunkVisuals(activeChunksList._activeChunks[x, y]);
         }
     }
 
@@ -151,7 +320,8 @@ public class Universe
 
     public UniverseChunk GetChunk(int x, int y)
     {
-        if ((x < 0 || y < 0) || (x > numChunksX - 1 || y > numChunksY - 1))
+        // x = 0 and y = 2
+        if (x < 0 || y < 0 || x > numChunksX - 1 || y > numChunksY - 1)
         {
             return null;
         }
@@ -160,7 +330,6 @@ public class Universe
             return activeChunksList._activeChunks[x, y];
         }
 
-        
 
         if (x >= 0 && y >= 0 && x < numChunksX && y < numChunksY)
         {
@@ -180,11 +349,14 @@ public class Universe
 
         GetChunkXY(worldPos, out chunkX, out chunkY);
         UniverseChunk chunk = GetChunk(chunkX, chunkY);
+        Debug.Log("GlobalX: " + chunk.globalPositionX + " GlobalY: " + chunk.globalPositionY);
+        Debug.Log("LocalX: " + chunk.localPositionX + " LocalY: " + chunk.localPositionY);
 
-        GetSectorXY(worldPos, out sectorX, out sectorY);
-        UniverseChunkSector chunkSector = GetChunkSector(chunk, sectorX, sectorY);
+        //GetSectorXY(worldPos, out sectorX, out sectorY);
+        //UniverseChunkSector chunkSector = GetChunkSector(chunk, sectorX, sectorY);
 
-        return chunkSector;
+        //return chunkSector;
+        return null;
     }
 
 
@@ -257,7 +429,7 @@ public class Universe
                     chunk.debugTextArray[x, y],
                     chunk.sectorsArray[x, y].spawnPoint);
 
-                SOSShipVisualSpawner.Instance.SpawnAShip(chunk.sectorsArray[x, y], this);
+                PlayerShipNavigator.Instance.SpawnSOSShip(chunk.sectorsArray[x, y], this);
 
                 return;
             }
@@ -272,9 +444,9 @@ public class Universe
 
             if(type == SpawnType.Sphere)
             {
+
+                PlayerShipNavigator.Instance.SpawnSOSShip(chunk.sectorsArray[x, y], this);
             }
-
-
         }
         else
         {
@@ -284,10 +456,8 @@ public class Universe
         chunk.InitSectorChangedEvent();
     }
 
-
     private void VisualizeSectorRandomInt(UniverseChunk chunk, int x, int y)
     {
-
         chunk.debugTextArray[x, y] = chunk.sectorsArray[x, y]?.GetRandomInt();
 
         Vector3 textPosition = chunk.GetSectorPosition(x, y); 

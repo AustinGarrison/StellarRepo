@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7342205942110125556}
   - component: {fileID: 6840280171355195394}
   m_Layer: 0
-  m_Name: SpawnedShip
+  m_Name: SpawnedShip - Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 293201412965241205}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3227247900201566611}
@@ -72,9 +72,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b,
-    type: 3}
+  m_SortingOrder: -1
+  m_Sprite: {fileID: 21300000, guid: 72510955f46471f49b2c725b3529adb3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -99,7 +98,7 @@ GameObject:
   - component: {fileID: 1321734138757049787}
   m_Layer: 0
   m_Name: SpawnedShip
-  m_TagString: Untagged
+  m_TagString: SOSShipMap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -132,11 +131,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70809652315d45241becc6e74374a4f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sosShipSprites:
+  - {fileID: 21300000, guid: 72510955f46471f49b2c725b3529adb3, type: 3}
+  - {fileID: 21300000, guid: ad81a20273dcaa045b3be3bd346dc812, type: 3}
   worldPosition: {x: 0, y: 0, z: 0}
-  SectorPosX: 0
-  SectorPosY: 0
+  globalSectorPosX: 0
+  globalSectorPosY: 0
+  localSectorPosX: 0
+  localSectorPosY: 0
   ChunkPosX: 0
   ChunkPosY: 0
+  rigidBody: {fileID: 5899989359180230412}
+  spriteRenderer: {fileID: 6840280171355195394}
+  playerShipNavigator: {fileID: 0}
+  startColor: {r: 1, g: 1, b: 1, a: 1}
+  endColor: {r: 0, g: 0, b: 0, a: 0}
+  fadeDuration: 2
+  elapsedTime: 0
 --- !u!50 &5899989359180230412
 Rigidbody2D:
   serializedVersion: 4
@@ -149,7 +160,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 5
+  m_Mass: 0.5
   m_LinearDrag: 1
   m_AngularDrag: 1
   m_GravityScale: 0

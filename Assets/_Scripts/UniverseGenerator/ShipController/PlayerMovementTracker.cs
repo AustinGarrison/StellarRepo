@@ -4,13 +4,14 @@ public class PlayerMovementTracker : MonoBehaviour
 {
     public Collider2D boxCollider2d;
     internal Universe universe;
-    private Vector3 center;
 
+    // Called from PlayerShipNavController
     public void Init(Transform gridCenter, Universe universe)
     {
         this.universe = universe;
-        center = gridCenter.position;
-        transform.position = center;
+
+        // Set position to center
+        transform.position = gridCenter.position;
     }
 
     private void Update()
@@ -20,6 +21,7 @@ public class PlayerMovementTracker : MonoBehaviour
             Debug.LogError("BoxCollider not assigned");
         }
 
+        // When the Mover crosses the bounds of its parent boxcollider, teleport it
         if(!boxCollider2d.bounds.Contains(transform.position))
         {
             TeleportToOtherSide();
@@ -36,48 +38,47 @@ public class PlayerMovementTracker : MonoBehaviour
         float newX = WrapCoordinate(transform.position.x, colliderCenter.x - colliderSize.x / 2, colliderCenter.x + colliderSize.x / 2);
         float newY = WrapCoordinate(transform.position.y, colliderCenter.y - colliderSize.y / 2, colliderCenter.y + colliderSize.y / 2);
 
-        UpdateCurrentGrid();
+        CalculateNewGrid();
 
         // Teleport the object to the new position
         transform.position = new Vector2(newX, newY);
     }
 
-    private void UpdateCurrentGrid()
+    private void CalculateNewGrid()
     {
-        bool hasLeftX = false;
-        bool hasLeftY = false;
+        bool hasLeft = false;
+
+        Universe.MoveChunkDir moveDirection = Universe.MoveChunkDir.None;
 
         // Exited on the Right
-        if (transform.position.x > boxCollider2d.bounds.max.x && !hasLeftX)
+        if (transform.position.x > boxCollider2d.bounds.max.x && !hasLeft)
         {
-            hasLeftX = true;
-            universe.MoveChunks(Universe.MoveChunkDir.East);
-            //universe.currentCenterChunkX += 1;
+            hasLeft = true;
+            moveDirection = Universe.MoveChunkDir.East;
         }
 
         // Exited on the Left
-        if (transform.position.x < boxCollider2d.bounds.min.x && !hasLeftX)
+        if (transform.position.x < boxCollider2d.bounds.min.x && !hasLeft)
         {
-            hasLeftX = true;
-            universe.MoveChunks(Universe.MoveChunkDir.West);
-            //universe.currentCenterChunkX -= 1;
+            hasLeft = true;
+            moveDirection = Universe.MoveChunkDir.West;
         }
 
         // Exited on the Top
-        if (transform.position.y > boxCollider2d.bounds.max.y && !hasLeftY)
+        if (transform.position.y > boxCollider2d.bounds.max.y && !hasLeft)
         {
-            hasLeftY = true;
-            universe.MoveChunks(Universe.MoveChunkDir.North);
-            //universe.currentCenterChunkY += 1;
+            hasLeft = true;
+            moveDirection = Universe.MoveChunkDir.North;
         }
 
         // Exited on the bottom
-        if (transform.position.y < boxCollider2d.bounds.min.y && !hasLeftY)
+        if (transform.position.y < boxCollider2d.bounds.min.y && !hasLeft)
         {
-            hasLeftY = true;
-            universe.MoveChunks(Universe.MoveChunkDir.South);
-            //universe.currentCenterChunkY -= 1;
+            moveDirection = Universe.MoveChunkDir.South;
         }
+
+        Destroy(universe.visibleShipsTextParent);
+        universe.MoveChunks(moveDirection);
     }
 
 

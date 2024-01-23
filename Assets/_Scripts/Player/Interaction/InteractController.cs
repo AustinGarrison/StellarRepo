@@ -60,6 +60,15 @@ public class InteractController : NetworkBehaviour
             ToggleInventoryUI();
     }
 
+    internal void Init()
+    {
+        GameInputPlayer.Instance.OnInteractAction += GameInput_OnInteractAction;
+        GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
+        GameInputPlayer.Instance.OnInventoryToggled += GameInput_OnInventoryToggled;
+        _cameraTransform = Camera.main.transform;
+        initialized = true;
+    }
+
     private void Update()
     {
         if (!initialized) return;
@@ -72,7 +81,7 @@ public class InteractController : NetworkBehaviour
 
             switch (type)
             {
-                case InteractType.InteractItem:
+                case InteractType.OperationItem:
                     interactText.SetActive(true);
                     break;
                 case InteractType.HoldItem:
@@ -91,15 +100,6 @@ public class InteractController : NetworkBehaviour
         }
     }
 
-    internal void Init()
-    {
-        GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
-        GameInput.Instance.OnAltInteractAction += Instance_OnAltInteractAction;
-        GameInput.Instance.OnInventoryToggled += Instance_OnInventoryToggled;
-        _cameraTransform = Camera.main.transform;
-        initialized = true;
-    }
-
     private void GameInput_OnInteractAction(object sender, System.EventArgs e)
     {
         if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit hit, pickupRange, interactLayer))
@@ -108,8 +108,8 @@ public class InteractController : NetworkBehaviour
 
             switch (type)
             {
-                case InteractType.InteractItem:
-                    Debug.Log("Interactable");
+                case InteractType.OperationItem:
+                    TriggerOperationItem(hit);
                     break;
                 case InteractType.HoldItem:
                     PickupHeldItem(hit);
@@ -124,20 +124,27 @@ public class InteractController : NetworkBehaviour
         }
     }
 
-    private void Instance_OnAltInteractAction(object sender, System.EventArgs e)
+    private void GameInput_OnAltInteractAction(object sender, System.EventArgs e)
     {
         DropHeldItem();
     }
 
-    private void Instance_OnInventoryToggled(object sender, System.EventArgs e)
+    private void GameInput_OnInventoryToggled(object sender, System.EventArgs e)
     {
         ToggleInventoryUI();
+    }
+
+    private void TriggerOperationItem(RaycastHit hit)
+    {
+        //hit.transform.GetComponent<OperationItem>().InteractWith();
     }
 
     private void PickupHeldItem(RaycastHit hit)
     {
         if (!holdingObject)
         {
+            //hit.transform.GetComponent<HoldItem>().InteractWith();
+
             //Pickup Item
             SetObjectInHandServer(hit.transform.gameObject, pickupPosition.position, pickupPosition.rotation, gameObject);
             objectInHand = hit.transform.gameObject;
@@ -151,8 +158,10 @@ public class InteractController : NetworkBehaviour
 
     private void PickupInventoryItem(RaycastHit hit)
     {
-        if (hit.transform.GetComponent<InteractItem>() == null)
-            return;
+        //if (hit.transform.GetComponent<InventoryItem>() == null)
+        //    return;
+
+        //hit.transform.GetComponent<InventoryItem>().InteractWith();
 
         AddToinventory(hit.transform.GetComponent<InteractItem>().itemScriptable);
 
@@ -297,7 +306,7 @@ public class InteractController : NetworkBehaviour
 
     private void HandleScrolling()
     {
-        float scrollInput = GameInput.Instance.GetScrollAxis() / 1000;
+        float scrollInput = GameInputPlayer.Instance.GetScrollAxis() / 1000;
 
         if (scrollInput > 0)
         {

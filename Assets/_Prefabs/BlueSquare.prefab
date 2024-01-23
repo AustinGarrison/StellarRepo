@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7909434505053490485}
   - component: {fileID: 7909434505053490482}
   - component: {fileID: 7909434505053490483}
-  - component: {fileID: 7909434505053490486}
+  - component: {fileID: 1658291054}
   m_Layer: 6
   m_Name: BlueSquare
   m_TagString: Untagged
@@ -143,12 +143,12 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 5
+  <PrefabId>k__BackingField: 6
   <SpawnableCollectionId>k__BackingField: 0
-  _scenePathHash: 4273547625
+  _scenePathHash: 2435362366
   <SceneId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 5795840822842361790
---- !u!114 &7909434505053490486
+--- !u!114 &1658291054
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -157,7 +157,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7909434505053490481}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62553faa3a63b3545821e0e3ab6ea5e8, type: 3}
+  m_Script: {fileID: 11500000, guid: ac4b6cb5d2b176543ae2eba66e7415c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   itemScriptable: {fileID: 11400000, guid: 5771b08a1942b714388e4fe1b3f72d54, type: 2}

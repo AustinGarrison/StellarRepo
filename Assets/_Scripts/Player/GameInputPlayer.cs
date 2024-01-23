@@ -3,9 +3,9 @@ using KinematicCharacterController.Examples;
 using System;
 using UnityEngine;
 
-public class GameInput : MonoBehaviour
+public class GameInputPlayer : MonoBehaviour
 {
-    public static GameInput Instance { get; private set; }
+    public static GameInputPlayer Instance { get; private set; }
 
     public event EventHandler OnJumpAction;
     public event EventHandler OnCrouchAction;
@@ -14,7 +14,7 @@ public class GameInput : MonoBehaviour
     public event EventHandler OnAltInteractAction;
     public event EventHandler OnInventoryToggled;
 
-    public enum Binding
+    public enum PlayerBinding
     {
         Move_Up,
         Move_Down,
@@ -70,6 +70,24 @@ public class GameInput : MonoBehaviour
     private void InventoryToggle_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
         OnInventoryToggled?.Invoke(this, EventArgs.Empty);
+    }
+
+    public float GetAccelerating()
+    {
+        float input = playerInputActions.StarMap.Accelerate.ReadValue<float>();
+        return input;
+    }
+
+    public float GetRotateRight()
+    {
+        float input = playerInputActions.StarMap.RotateRight.ReadValue<float>();
+        return input;
+    }
+
+    public float GetRotateLeft()
+    {
+        float input = playerInputActions.StarMap.RotateLeft.ReadValue<float>();
+        return input;
     }
 
     private void OnDestroy()

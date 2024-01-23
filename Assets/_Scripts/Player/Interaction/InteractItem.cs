@@ -1,16 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum InteractType
 {
     HoldItem,
     InventoryItem,
-    InteractItem
+    OperationItem
 }
 
-public class InteractItem : MonoBehaviour
+public class InteractItem : MonoBehaviour, IInteractItem
 {
     public Item itemScriptable;
     public InteractType type;
+
+    public virtual void InteractWith() { }
 }

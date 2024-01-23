@@ -1,8 +1,9 @@
 using CodeMonkey.Utils;
 using TMPro;
 using UnityEngine;
-using UnityEngine.iOS;
+using UnityEngine.Rendering.Universal;
 
+// Determine if SOSShips spawn as text or sprite
 public enum SpawnType
 {
     Text,
@@ -10,44 +11,43 @@ public enum SpawnType
     Both
 }
 
-public class UniverseController : MonoBehaviour
+public class UniverseManager : MonoBehaviour
 {
     [SerializeField] private SerializedChunks serializedChunks;
     [SerializeField] private GameObject ship;
     internal Universe universe;
 
     public TextMeshProUGUI currentChunkText;
-    public int numberOfChunksX;
-    public int numberOfChunksY;
 
-    public int numberOfSectorsXY;
-    public int sectorGuiSize;
-    public GameObject ShipMovement;
-    public SpawnType spawnType;
+    [Header("Settings")]
+    [ReadOnlyRunTime] public int numberOfChunksXY;
+    [ReadOnlyRunTime] public int numberOfChunksY;
+    [ReadOnlyRunTime] public int numberOfSectorsXY;
+    [ReadOnlyRunTime] public int sectorGuiSize;
+    [ReadOnlyRunTime] public SpawnType spawnType;
 
 
     private void Start()
     {
-        universe = new Universe(serializedChunks, numberOfSectorsXY, sectorGuiSize, numberOfChunksX, numberOfChunksY, spawnType);
+        universe = new Universe(serializedChunks, numberOfChunksXY, numberOfSectorsXY, sectorGuiSize, spawnType);
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(2))
         {
             Vector3 pos = UtilsClass.GetMouseWorldPosition();
-
-            Debug.Log(pos);
-            universe.GetChunk(pos);
             
-            //UniverseChunkSector sector = universe.GetChunkSector(pos);
-
-            //universe.AddShip(pos);
+            //universe.GetChunk(pos);
+            
+            UniverseChunkSector sector = universe.GetChunkSector(pos);
+            //Debug.Log(sector.universeSectorX + " " + sector.universeSectorY);
+            //universe.AddShip(sector);
         }
 
         if (Input.GetMouseButtonDown(1))
         {
-            Vector3 pos = UtilsClass.GetMouseWorldPosition();
+            Vector3 pos = UtilsClass.GetMouseWorldPosition();            
             Debug.Log(universe.GetIsShip(pos));
         }
 
@@ -57,6 +57,7 @@ public class UniverseController : MonoBehaviour
         currentChunkText.text = currentChunk;
     }
 
+    // Called from Canvas Buttons
     public void MoveMap(int dir)
     {
         Destroy(universe.visibleShipsTextParent);

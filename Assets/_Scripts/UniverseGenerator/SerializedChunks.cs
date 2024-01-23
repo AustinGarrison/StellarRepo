@@ -17,8 +17,8 @@ public class SerializedChunks : MonoBehaviour, ISerializationCallbackReceiver
     [System.Serializable]
     struct ChunkStruct<TElement>
     {
-        public int localPosX;
-        public int localPosY;
+        [ReadOnlyRunTime] public int localPosX;
+        [ReadOnlyRunTime] public int localPosY;
         public TElement Chunk;
         public ChunkStruct(int posX, int posY, TElement element)
         {
@@ -98,10 +98,13 @@ public class UniverseChunk
     public void SetupChunk(int globalX, int globalY, int localX, int localY, int numberOfSectorsXY, int sectorGUISize, out bool hasShip)
     {
         this.hasShip = false;
+
         globalPositionX = globalX;
         globalPositionY = globalY;
+
         localPositionX = localX;
         localPositionY = localY;
+
         this.numberOfSectorsXY = numberOfSectorsXY;
         this.sectorGUISize = sectorGUISize;
 

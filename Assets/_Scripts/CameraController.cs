@@ -75,7 +75,7 @@ public class CameraController : NetworkBehaviour
 
     public void HandleCameraInput()
     {
-        Vector2 look = GameInput.Instance.GetLookVector();
+        Vector2 look = GameInputPlayer.Instance.GetLookVector();
 
         Vector3 lookInputVector = new Vector3(look.x / 20, look.y / 20, 0f);
 

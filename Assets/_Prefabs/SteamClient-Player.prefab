@@ -642,8 +642,6 @@ MonoBehaviour:
   pickupPosition: {fileID: 2447050315292226344}
   invDropItemObject: {fileID: 486024413833497395, guid: 850e159ba4485fc47a58b171c5c964ba,
     type: 3}
-  pickupKey: 101
-  dropKey: 103
   toggleInventory: 9
   crosshair: {fileID: 5359481958758558790}
   holdText: {fileID: 1419862779368693335}
@@ -931,7 +929,7 @@ GameObject:
   - component: {fileID: 2669254613460341116}
   - component: {fileID: 8154127043523862247}
   m_Layer: 0
-  m_Name: SteamClient
+  m_Name: SteamClient-Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -988,7 +986,7 @@ MonoBehaviour:
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 7177653438559749644
+  <AssetPathHash>k__BackingField: 2458939375428038750
 --- !u!1 &5359481958758558790
 GameObject:
   m_ObjectHideFlags: 0

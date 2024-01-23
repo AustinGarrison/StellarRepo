@@ -9331,7 +9331,7 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 60c42fb470eea2b4198867ba20e2b905, type: 2}
+  - {fileID: 2100000, guid: 0f29e3c1c576f6641b9e474f6b194480, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -20426,7 +20426,7 @@ GameObject:
   - component: {fileID: 1029097195}
   - component: {fileID: 1029097194}
   - component: {fileID: 1029097193}
-  - component: {fileID: 1029097192}
+  - component: {fileID: 1029097198}
   m_Layer: 6
   m_Name: PickupItem
   m_TagString: Untagged
@@ -20450,20 +20450,6 @@ Transform:
   m_Father: {fileID: 902760767}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1029097192
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1029097190}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62553faa3a63b3545821e0e3ab6ea5e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemScriptable: {fileID: 0}
-  type: 0
 --- !u!114 &1029097193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20576,6 +20562,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1029097190}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1029097198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029097190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d8f4433c5935b14abcd375c76eb2d71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemScriptable: {fileID: 0}
+  type: 0
 --- !u!1 &1033963713
 GameObject:
   m_ObjectHideFlags: 0
@@ -28402,7 +28402,7 @@ GameObject:
   - component: {fileID: 1451376313}
   - component: {fileID: 1451376312}
   - component: {fileID: 1451376311}
-  - component: {fileID: 1451376310}
+  - component: {fileID: 1451376314}
   m_Layer: 6
   m_Name: Screen
   m_TagString: Untagged
@@ -28426,20 +28426,6 @@ Transform:
   m_Father: {fileID: 1145907844}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1451376310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1451376308}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62553faa3a63b3545821e0e3ab6ea5e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemScriptable: {fileID: 0}
-  type: 2
 --- !u!65 &1451376311
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -28503,6 +28489,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1451376308}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1451376314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1451376308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b29f92375deb2443a156f7df3d212b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemScriptable: {fileID: 0}
+  type: 2
 --- !u!1 &1453444973
 GameObject:
   m_ObjectHideFlags: 0
@@ -30035,7 +30035,7 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a6501adaf78814c43b95d27ec855fc02, type: 2}
+  - {fileID: 2100000, guid: 0f29e3c1c576f6641b9e474f6b194480, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -32271,10 +32271,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BlueSquare
       objectReference: {fileID: 0}
-    - target: {fileID: 7909434505053490483, guid: f23761f00f90fd8469c395f922e810ff,
+    - target: {fileID: 7909434505053490481, guid: f23761f00f90fd8469c395f922e810ff,
         type: 3}
-      propertyPath: _scenePathHash
-      value: 2435362366
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7909434505053490483, guid: f23761f00f90fd8469c395f922e810ff,
         type: 3}
@@ -34071,7 +34071,7 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 60c42fb470eea2b4198867ba20e2b905, type: 2}
+  - {fileID: 2100000, guid: 0f29e3c1c576f6641b9e474f6b194480, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -1,40 +1,69 @@
+using HeathenEngineering;
 using UnityEngine;
 
 public class SOSShipVisual : MonoBehaviour
 {
     internal Universe universe;
-    private PlayerShipNavController controller;
+
+    public Sprite[] sosShipSprites = null;
     public Vector3 worldPosition = Vector3.zero;
-    public int SectorPosX;
-    public int SectorPosY;
+    public int globalSectorPosX;
+    public int globalSectorPosY;
+    public int localSectorPosX;
+    public int localSectorPosY;
     public int ChunkPosX;
     public int ChunkPosY;
 
-    private Rigidbody2D rb;
+    public Rigidbody2D rigidBody;
+    public SpriteRenderer spriteRenderer;
+    public PlayerShipNavigator playerShipNavigator;
 
-
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody2D>();
-    }
+    public Color startColor = Color.white;
+    public Color endColor = Color.clear;
+    public float fadeDuration = 2f;
+    private float elapsedTime = 0f;
+    private bool inPlayerProximity;
 
     private void Start()
     {
-        rb.velocity = -PlayerShipNavController.Instance.movementDirection * PlayerShipNavController.Instance.thrustSpeed;
-        // PlayerShipNavController.OnSpacebarPressed += OnSpacebarPressed;
+        spriteRenderer.sprite = sosShipSprites[0];
+        playerShipNavigator = PlayerShipNavigator.Instance;
+        spriteRenderer.color = endColor;
+        elapsedTime = fadeDuration;
     }
-
-    void OnDestroy()
-    {
-        // Unsubscribe from the event when the object is destroyed
-        // PlayerShipNavController.OnSpacebarPressed -= OnSpacebarPressed;
-    }
-
+    
     private void Update()
     {
+        GetChunkSector();
 
+        if (!inPlayerProximity)
+            DisappearTimer();
+    }
+
+    private void FixedUpdate()
+    {
         UpdatePositions();
+    }
 
+    private void DisappearTimer()
+    {
+        if(elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / fadeDuration;
+            spriteRenderer.color = Color.Lerp(startColor, endColor, t);
+        }
+    }
+
+    private void UpdatePositions()
+    {
+        // Apply force based on the combined movement directions
+        float adjustedThrustSpeed = PlayerShipNavigator.Instance.thrustSpeed / transform.localScale.x;
+        rigidBody.AddForce(-PlayerShipNavigator.Instance.movementDirection * adjustedThrustSpeed);
+    }
+
+    private void GetChunkSector()
+    {
         UniverseChunk chunk = universe.GetChunk(transform.position);
 
         if (chunk == null)
@@ -42,24 +71,31 @@ public class SOSShipVisual : MonoBehaviour
             Destroy(this.gameObject);
             return;
         }
-            
-        UniverseChunkSector sector = universe.GetChunkSector(transform.position);
 
-        SectorPosX = sector.sectorPosition.x;
-        SectorPosY = sector.sectorPosition.y;
-        ChunkPosX = chunk.localPositionX;
-        ChunkPosY = chunk.localPositionY;
+        //UniverseChunkSector sector = universe.GetChunkSector(transform.position);
+
+        //localSectorPosX = sector.sectorPosition.x;
+        //localSectorPosY = sector.sectorPosition.y;
+        //ChunkPosX = chunk.localPositionX;
+        //ChunkPosY = chunk.localPositionY;
     }
 
-    private void UpdatePositions()
+    public void SetColor(Color color)
     {
-        // Apply force based on the combined movement directions
-        rb.AddForce(-PlayerShipNavController.Instance.movementDirection * PlayerShipNavController.Instance.thrustSpeed);
+        elapsedTime = 0f;
+        spriteRenderer.color = color;
     }
 
-    private void OnSpacebarPressed(Vector2 movementDirection, float thrustSpeed)
+    public void ShowSelectedSprite()
     {
+        SetColor(Color.white);
+        spriteRenderer.sprite = sosShipSprites[1];
+        inPlayerProximity = true;
+    }
 
-
+    public void ShowUnselectedSprite()
+    {
+        spriteRenderer.sprite = sosShipSprites[0];
+        inPlayerProximity = false;
     }
 }

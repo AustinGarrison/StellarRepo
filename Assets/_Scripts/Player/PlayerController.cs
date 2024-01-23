@@ -84,7 +84,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
     private bool _isCrouching = false;
     private bool initialized = false;
 
-
     private void Awake()
     {
         Motor = GetComponent<KinematicCharacterMotor>();
@@ -124,16 +123,19 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     internal void Init()
     {
-        GameInput.Instance.OnJumpAction += GameInput_OnJumpAction;
-        GameInput.Instance.OnCrouchAction += GameInput_OnCrouchAction;
-        GameInput.Instance.OnStandAction += GameInput_OnStandAction;
+        GameInputPlayer.Instance.OnJumpAction += GameInput_OnJumpAction;
+        GameInputPlayer.Instance.OnCrouchAction += GameInput_OnCrouchAction;
+        GameInputPlayer.Instance.OnStandAction += GameInput_OnStandAction;
 
         playerCamera = Camera.main;
         cameraController = playerCamera.GetComponent<CameraController>();
         cameraController.BaseAwake();
 
+
+        Debug.LogError("Finished to here");
         inventoryController = GetComponent<InteractController>();
         inventoryController.Init();
+        Debug.LogError("Not Finished");
 
         // Tell camera to follow transform
         cameraController.SetFollowTransform(cameraFollowPoint);
@@ -144,8 +146,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
         initialized = true;
     }
-
-
 
     private void Update()
     {
@@ -189,7 +189,7 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     public void HandleMovement()
     {
-        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
+        Vector2 inputVector = GameInputPlayer.Instance.GetMovementVectorNormalized();
         Vector3 moveInputVector = new Vector3(inputVector.x, 0, inputVector.y);
 
         Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(cameraController.Transform.rotation * Vector3.forward, Motor.CharacterUp).normalized;
