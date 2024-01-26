@@ -37,7 +37,6 @@ public class BootstrapNetworkManager : NetworkBehaviour
     [ObserversRpc]
     void EnterGameSceneObserver()
     {
-
         OnGameStarted?.Invoke(instance, EventArgs.Empty);
     }
 

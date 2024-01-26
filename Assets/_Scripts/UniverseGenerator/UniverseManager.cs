@@ -1,15 +1,6 @@
 using CodeMonkey.Utils;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
-
-// Determine if SOSShips spawn as text or sprite
-public enum SpawnType
-{
-    Text,
-    Sphere,
-    Both
-}
 
 public class UniverseManager : MonoBehaviour
 {
@@ -24,12 +15,10 @@ public class UniverseManager : MonoBehaviour
     [ReadOnlyRunTime] public int numberOfChunksY;
     [ReadOnlyRunTime] public int numberOfSectorsXY;
     [ReadOnlyRunTime] public int sectorGuiSize;
-    [ReadOnlyRunTime] public SpawnType spawnType;
-
 
     private void Start()
     {
-        universe = new Universe(serializedChunks, numberOfChunksXY, numberOfSectorsXY, sectorGuiSize, spawnType);
+        universe = new Universe(serializedChunks, numberOfChunksXY, numberOfSectorsXY, sectorGuiSize);
     }
 
     private void Update()
@@ -56,27 +45,4 @@ public class UniverseManager : MonoBehaviour
 
         currentChunkText.text = currentChunk;
     }
-
-    // Called from Canvas Buttons
-    public void MoveMap(int dir)
-    {
-        Destroy(universe.visibleShipsTextParent);
-
-        switch (dir)
-        {
-            case 1:
-                universe.MoveChunks(Universe.MoveChunkDir.North);
-                break;
-            case -1:
-                universe.MoveChunks(Universe.MoveChunkDir.South);
-                break;
-            case 2:
-                universe.MoveChunks(Universe.MoveChunkDir.East);
-                break;
-            case -2:
-                universe.MoveChunks(Universe.MoveChunkDir.West);
-                break;
-        }
-    }
-
 }

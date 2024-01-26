@@ -16,8 +16,6 @@ public class Universe
         West
     }
 
-    public GameObject visibleShipsTextParent;
-
     SerializedChunks activeChunksList;
     Vector2Int centerChunkOffset = new Vector2Int(0, 0);
 
@@ -29,19 +27,16 @@ public class Universe
     int numChunksX, numChunksY;
 
 
-    public Universe(SerializedChunks activeChunksList, int numChunkXY, int numberOfSectorsXY, int sectorGUISize,  SpawnType spawnType)
+    public Universe(SerializedChunks activeChunksList, int numChunkXY, int numberOfSectorsXY, int sectorGUISize)
     {
         this.activeChunksList = activeChunksList;
         this.numberOfSectorsXY = numberOfSectorsXY;
         this.sectorGUISize = sectorGUISize;
         this.numChunksX = numChunkXY;
         this.numChunksY = numChunkXY;
-        type = spawnType;
 
         currentCenterChunkX = 0;
         currentCenterChunkY = 0;
-
-        visibleShipsTextParent = new GameObject("UniverseTextParent");
 
         StartingChunks();
 
@@ -65,8 +60,6 @@ public class Universe
 
     public void MoveChunks(MoveChunkDir newDirection)
     {
-        visibleShipsTextParent = new GameObject("UniverseTextParent");
-
         switch (newDirection)
         {
             case MoveChunkDir.North:
@@ -387,10 +380,6 @@ public class Universe
 
     private void ChunkVisuals(UniverseChunk chunkToRender)
     {
-        chunkToRender.chunkTextParent = new GameObject("ChunkTextParent");
-        chunkToRender.chunkTextParent.transform.SetParent(visibleShipsTextParent.transform);
-        chunkToRender.debugTextArray = new string[numberOfSectorsXY, numberOfSectorsXY];
-
         for (int sectorX = 0; sectorX < chunkToRender.sectorsArray.GetLength(0); sectorX++)
         {
             for (int sectorY = 0; sectorY < chunkToRender.sectorsArray.GetLength(1); sectorY++)
@@ -405,16 +394,10 @@ public class Universe
         //DrawChunkBorders(chunkToRender);
     }
 
-
-
-    public SpawnType type;
-        
     private void VisualizeSectorShips(UniverseChunk chunk, int x, int y)
     {
         if (chunk.sectorsArray[x, y]?.GetIsShip() == "True")
         {
-            chunk.debugTextArray[x, y] = "Ship";
-
             Vector3 textPosition = chunk.GetSectorPosition(x, y);
             
             textPosition.x -= (numberOfSectorsXY * sectorGUISize) * currentCenterChunkX;
@@ -422,35 +405,8 @@ public class Universe
 
             chunk.sectorsArray[x, y].spawnPoint = textPosition + new Vector3(sectorGUISize, sectorGUISize, 0) / 2;
 
-            if (type == SpawnType.Both)
-            {
-                CreateSectorText(
-                    chunk.chunkTextParent.transform,
-                    chunk.debugTextArray[x, y],
-                    chunk.sectorsArray[x, y].spawnPoint);
-
-                PlayerShipNavigator.Instance.SpawnSOSShip(chunk.sectorsArray[x, y], this);
-
-                return;
-            }
-
-            if (type == SpawnType.Text)
-            {
-                CreateSectorText(
-                    chunk.chunkTextParent.transform,
-                    chunk.debugTextArray[x, y],
-                    chunk.sectorsArray[x, y].spawnPoint);
-            }
-
-            if(type == SpawnType.Sphere)
-            {
-
-                PlayerShipNavigator.Instance.SpawnSOSShip(chunk.sectorsArray[x, y], this);
-            }
-        }
-        else
-        {
-            chunk.debugTextArray[x, y] = "";
+            PlayerShipNavigator.Instance.SpawnSOSShip(chunk.sectorsArray[x, y], this);
+            
         }
 
         chunk.InitSectorChangedEvent();
@@ -458,54 +414,12 @@ public class Universe
 
     private void VisualizeSectorRandomInt(UniverseChunk chunk, int x, int y)
     {
-        chunk.debugTextArray[x, y] = chunk.sectorsArray[x, y]?.GetRandomInt();
-
         Vector3 textPosition = chunk.GetSectorPosition(x, y); 
         
         textPosition.x -= (numberOfSectorsXY * sectorGUISize) * currentCenterChunkX;
         textPosition.y -= (numberOfSectorsXY * sectorGUISize) * currentCenterChunkY;//* centerChunkOffset.y;
 
-        CreateSectorText(
-                chunk.chunkTextParent.transform,
-                chunk.debugTextArray[x, y],
-                textPosition + new Vector3(sectorGUISize, sectorGUISize, 0) / 2);
-
         chunk.InitSectorChangedEvent();
-    }
-
-    public static TextMesh CreateSectorText(Transform parent, string text, Vector3 localPosition)
-    {
-        GameObject gameObject = new GameObject("Sector_Text", typeof(TextMesh));
-        Transform transform = gameObject.transform;
-        transform.SetParent(parent, false);
-        transform.localPosition = localPosition;
-
-        TextMesh textMesh = gameObject.GetComponent<TextMesh>();
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.text = text;
-        textMesh.fontSize = 20;
-        textMesh.color = Color.white;
-        return textMesh;
-    }
-
-    private void DrawChunkBorders(UniverseChunk chunk)
-    {
-        DrawBorder(chunk.GetSectorPosition(0, 0), chunk.GetSectorPosition(0, chunk.sectorsArray.GetLength(1)));
-        DrawBorder(chunk.GetSectorPosition(0, 0), chunk.GetSectorPosition(chunk.sectorsArray.GetLength(1), 0));
-
-        // Visible Universe Top
-        DrawBorder(chunk.GetSectorPosition(0, chunk.sectorsArray.GetLength(1)), chunk.GetSectorPosition(chunk.sectorsArray.GetLength(0), chunk.sectorsArray.GetLength(1)));
-        // Visible Universe Right Side
-        DrawBorder(chunk.GetSectorPosition(chunk.sectorsArray.GetLength(0), chunk.sectorsArray.GetLength(1)), chunk.GetSectorPosition(chunk.sectorsArray.GetLength(0), 0));
-    }
-
-    private void DrawBorder(Vector3 start, Vector3 end)
-    {
-        start.y -= (numberOfSectorsXY * sectorGUISize) * centerChunkOffset.y;
-        end.y -= (numberOfSectorsXY * sectorGUISize) * centerChunkOffset.y;
-
-        Debug.DrawLine(start, end, Color.white, 100f);
     }
 
     #endregion

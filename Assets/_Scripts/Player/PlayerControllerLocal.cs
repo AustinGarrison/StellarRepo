@@ -1,41 +1,7 @@
-using FishNet.Component.Spawning;
-using FishNet.Demo.AdditiveScenes;
-using FishNet.Object;
-using GameKit.Dependencies.Utilities.Types;
 using KinematicCharacterController;
-using KinematicCharacterController.Examples;
 using UnityEngine;
 
-public enum CharacterState
-{
-    Default,
-}
-
-public enum OrientationMethod
-{
-    TowardsCamera,
-    TowardsMovement,
-}
-
-public enum AdditionalOrientationMethod
-{
-    None,
-    TowardsGravity,
-    TowardsGroundSlopeAndGravity,
-}
-
-public struct PlayerInputs
-{
-    public float MoveAxisForward;
-    public float MoveAxisRight;
-    public Quaternion CameraRotation;
-    public float JumpDown;
-    public bool CrouchDown;
-    public bool CrouchUp;
-
-}
-
-public class PlayerController : NetworkBehaviour, ICharacterController
+public class PlayerControllerLocal : MonoBehaviour, ICharacterController
 {
 
     [Header("Stable Movement")]
@@ -93,21 +59,13 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         Motor.CharacterController = this;
     }
 
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        
-        if(!base.IsOwner)
-        {
-            this.enabled = false;
-            Motor.enabled = false;
-            return;
-        }
-        else
-        {
-            BootstrapNetworkManager.OnGameStarted += BootstrapNetworkManager_OnGameStarted;
-        }
+    private void Start()
+    { 
+        this.enabled = false;
+        Motor.enabled = false;
+        return;
     }
+
     private void BootstrapNetworkManager_OnGameStarted(object sender, System.EventArgs e)
     {
         Init();
@@ -145,10 +103,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     private void Update()
     {
-        if(!base.IsOwner || initialized == false)
-        {
-            return;
-        }
 
         HandleMovement();
         HandleCharacterInput();
@@ -161,10 +115,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
 
     private void LateUpdate()
     {
-        if (!base.IsOwner || initialized == false)
-        {
-            return;
-        }
 
         if (cameraController.RotateWithPhysicsMover && Motor.AttachedRigidbody != null)
         {

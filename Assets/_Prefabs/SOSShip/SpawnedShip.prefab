@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7342205942110125556}
   - component: {fileID: 6840280171355195394}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: SpawnedShip - Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -147,7 +147,6 @@ MonoBehaviour:
   startColor: {r: 1, g: 1, b: 1, a: 1}
   endColor: {r: 0, g: 0, b: 0, a: 0}
   fadeDuration: 2
-  elapsedTime: 0
 --- !u!50 &5899989359180230412
 Rigidbody2D:
   serializedVersion: 4

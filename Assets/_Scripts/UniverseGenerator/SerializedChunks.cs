@@ -83,14 +83,11 @@ public class UniverseChunk
 
     public int numberOfSectorsXY;
     public int sectorGUISize;
-    public GameObject chunkTextParent;
 
     private UniverseChunkSector chunkSector;
     public UniverseChunkSector[,] sectorsArray;
 
     Vector3 originOffset = Vector3.zero;
-
-    public string[,] debugTextArray;
 
     private Vector2Int sector;
     private bool hasShip = false;
@@ -139,9 +136,9 @@ public class UniverseChunk
     {
         OnSectorValueChanged += (object sender, OnSectorValueChangedEventArgs eventArgs) =>
         {
-            debugTextArray[
-                eventArgs.sector.sectorPosition.x, eventArgs.sector.sectorPosition.y] =
-                sectorsArray[eventArgs.sector.sectorPosition.x, eventArgs.sector.sectorPosition.y]?.GetIsShip();
+            //debugTextArray[
+            //    eventArgs.sector.sectorPosition.x, eventArgs.sector.sectorPosition.y] =
+            //    sectorsArray[eventArgs.sector.sectorPosition.x, eventArgs.sector.sectorPosition.y]?.GetIsShip();
         };
     }
 

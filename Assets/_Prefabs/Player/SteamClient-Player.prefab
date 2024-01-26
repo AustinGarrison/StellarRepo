@@ -712,7 +712,7 @@ GameObject:
   - component: {fileID: 8016739836557663506}
   - component: {fileID: 3034658130814511717}
   m_Layer: 9
-  m_Name: Sphere
+  m_Name: HoldPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -748,7 +748,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2974068778556872730}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -982,11 +982,11 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 1
+  <PrefabId>k__BackingField: 2
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 2458939375428038750
+  <AssetPathHash>k__BackingField: 8745586589426651428
 --- !u!1 &5359481958758558790
 GameObject:
   m_ObjectHideFlags: 0

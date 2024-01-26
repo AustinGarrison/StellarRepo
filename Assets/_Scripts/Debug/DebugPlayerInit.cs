@@ -9,7 +9,7 @@ public class DebugPlayerInit : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.F10))
+        if(Input.GetKeyDown(KeyCode.F10)) 
         {
             InitPlayer.Invoke();
             Destroy(this);

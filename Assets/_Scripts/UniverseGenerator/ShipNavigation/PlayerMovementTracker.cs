@@ -76,8 +76,6 @@ public class PlayerMovementTracker : MonoBehaviour
         {
             moveDirection = Universe.MoveChunkDir.South;
         }
-
-        Destroy(universe.visibleShipsTextParent);
         universe.MoveChunks(moveDirection);
     }
 

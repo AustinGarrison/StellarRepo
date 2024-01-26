@@ -1,10 +1,9 @@
-using FishNet.Object;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InteractController : NetworkBehaviour
+public class InteractControllerLocal : MonoBehaviour
 {
     [SerializeField] private Transform pickupPosition;
     [SerializeField] GameObject invDropItemObject;
@@ -43,18 +42,8 @@ public class InteractController : NetworkBehaviour
         pickupText.SetActive(false);
     }
 
-    public override void OnStartClient()
+    private void Start()
     {
-        base.OnStartClient();
-
-        if (!IsOwner)
-        {
-            enabled = false;
-            return;
-        }
-
-        //worldHeldItemHolder = GameObject.FindGameObjectWithTag("WorldInteractItems").transform;
-
         //Turns off inventory if its on
         if (invPanel.activeSelf)
             ToggleInventoryUI();
@@ -146,7 +135,7 @@ public class InteractController : NetworkBehaviour
             //hit.transform.GetComponent<HoldItem>().InteractWith();
 
             //Pickup Item
-            SetObjectInHandServer(hit.transform.gameObject, pickupPosition.position, pickupPosition.rotation, gameObject);
+            SetObjectInHand(hit.transform.gameObject, pickupPosition.position, pickupPosition.rotation, gameObject);
             objectInHand = hit.transform.gameObject;
             holdingObject = true;
         }
@@ -165,7 +154,8 @@ public class InteractController : NetworkBehaviour
 
         AddToinventory(hit.transform.GetComponent<InteractItem>().itemScriptable);
 
-        DespawnObjectServer(hit.transform.gameObject);
+        // Despawn Object
+        Destroy(hit.transform.gameObject);
     }
 
     private void AddToinventory(Item newItem)
@@ -182,30 +172,17 @@ public class InteractController : NetworkBehaviour
         inventoryObjects.Add(new InventoryObject() { item = newItem, amount = 1 });
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void DespawnObjectServer(GameObject objectToDespawn)
-    {
-        ServerManager.Despawn(objectToDespawn, DespawnType.Destroy);
-    }
-
     private void DropHeldItem()
     {
         if (!holdingObject)
             return;
 
-        DropObjectServer(objectInHand, worldHeldItemHolder);
+        DropObjectObserver(objectInHand, worldHeldItemHolder);
         holdingObject = false;
         objectInHand = null;
     }
-
-    [ServerRpc(RequireOwnership = false)]
-    void SetObjectInHandServer(GameObject obj, Vector3 position, Quaternion rotation, GameObject player)
-    {
-        SetObjectInHandObserver(obj, position, rotation, player);
-    }
-
-    [ObserversRpc]
-    void SetObjectInHandObserver(GameObject obj, Vector3 position, Quaternion rotation, GameObject player)
+    
+    void SetObjectInHand(GameObject obj, Vector3 position, Quaternion rotation, GameObject player)
     {
         obj.transform.position = position;
         obj.transform.rotation = rotation;
@@ -219,13 +196,6 @@ public class InteractController : NetworkBehaviour
         
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void DropObjectServer(GameObject obj, Transform worldObjects)
-    {
-        DropObjectObserver(obj, worldObjects);
-    }
-
-    [ObserversRpc]
     private void DropObjectObserver(GameObject obj, Transform worldObjects)
     {
         obj.transform.parent = worldObjects;
@@ -281,7 +251,7 @@ public class InteractController : NetworkBehaviour
             if(inventoryObject.amount > 1)
             {
                 inventoryObject.amount--;
-                DropItemServer(inventoryObject.item.prefab, inventoryObject.item.itemName, _cameraTransform.transform.position + _cameraTransform.transform.forward);
+                DropItem(inventoryObject.item.prefab, inventoryObject.item.itemName, _cameraTransform.transform.position + _cameraTransform.transform.forward);
                 UpdateInventoryUI();
                 return;
             }
@@ -289,19 +259,17 @@ public class InteractController : NetworkBehaviour
             if(inventoryObject.amount <= 1)
             {
                 inventoryObjects.Remove(inventoryObject);
-                DropItemServer(inventoryObject.item.prefab, inventoryObject.item.itemName, _cameraTransform.transform.position + _cameraTransform.transform.forward);
+                DropItem(inventoryObject.item.prefab, inventoryObject.item.itemName, _cameraTransform.transform.position + _cameraTransform.transform.forward);
                 UpdateInventoryUI();
                 return;
             }
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    void DropItemServer(GameObject prefab, string name, Vector3 position)
+    void DropItem(GameObject prefab, string name, Vector3 position)
     {
         GameObject drop = Instantiate(prefab, position, Quaternion.identity, worldHeldItemHolder);
         drop.name = name;
-        ServerManager.Spawn(drop);
     }
 
     private void HandleScrolling()

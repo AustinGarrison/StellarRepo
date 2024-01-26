@@ -15,7 +15,7 @@ public class Radar : MonoBehaviour
     private void Awake()
     {
         sweepTransform = transform.Find("Sweep");
-        rotationspeed = 180f;
+        rotationspeed = 140f;
         radarDistance = 150f; // Width of sweepsprite
         colliderList = new List<Collider2D>();
     }
@@ -26,31 +26,29 @@ public class Radar : MonoBehaviour
         sweepTransform.eulerAngles -= new Vector3(0, 0, rotationspeed * Time.deltaTime);
         float currentRotation = (sweepTransform.eulerAngles.z % 360) - 180;
 
-        //if( previousRotation < 0 && currentRotation >= 0)
-        //{
-        //    // Half rotation
-        //    colliderList.Clear();
-        //}
+        if (previousRotation < 0 && currentRotation >= 0)
+        {
+            // Half rotation
+            colliderList.Clear();
+        }
 
         RaycastHit2D raycastHit2D =  Physics2D.Raycast(transform.position, GetVectorFromAngle(sweepTransform.eulerAngles.z), radarDistance, ~layerToIgnore);
 
         if (raycastHit2D.collider != null)
         {
-            SOSShipVisual sosShipVisual = raycastHit2D.collider.GetComponent<SOSShipVisual>();
-            Debug.Log(sosShipVisual);
-
-            if(sosShipVisual != null )
-            {
-                sosShipVisual.SetColor(Color.white);
-            }
-
-
             // Hit something
-            //if (!colliderList.Contains(raycastHit2D.collider))
-            //{
-            //    // Hit this one for the first time
-            //    colliderList.Add(raycastHit2D.collider);
-            //}
+            if (!colliderList.Contains(raycastHit2D.collider))
+            {
+                SOSShipVisual sosShipVisual = raycastHit2D.collider.GetComponent<SOSShipVisual>();
+
+                if(sosShipVisual != null )
+                {
+                    sosShipVisual.SetColor(Color.white);
+                }
+
+                // Hit this one for the first time
+                colliderList.Add(raycastHit2D.collider);
+            }
         }
     }
 
