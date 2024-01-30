@@ -105,7 +105,6 @@ public class InteractController : NetworkBehaviour
         if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit hit, pickupRange, interactLayer))
         {
             InteractType type = hit.transform.gameObject.GetComponent<InteractItem>().type;
-
             switch (type)
             {
                 case InteractType.OperationItem:

@@ -13,9 +13,9 @@ public class InteractControllerLocal : MonoBehaviour
     [SerializeField] private KeyCode toggleInventory = KeyCode.Tab;
 
     [SerializeField] GameObject crosshair;
-    [SerializeField] GameObject holdText;
-    [SerializeField] GameObject interactText;
-    [SerializeField] GameObject pickupText;
+    [SerializeField] TextMeshProUGUI holdText;
+    [SerializeField] TextMeshProUGUI operationText;
+    [SerializeField] TextMeshProUGUI pickupText;
 
     [SerializeField] private float pickupRange = 4f;
 
@@ -37,9 +37,9 @@ public class InteractControllerLocal : MonoBehaviour
 
     private void Awake()
     {
-        holdText.SetActive(false);
-        interactText.SetActive(false);
-        pickupText.SetActive(false);
+        holdText.gameObject.SetActive(false);
+        operationText.gameObject.SetActive(false);
+        pickupText.gameObject.SetActive(false);
     }
 
     private void Start()
@@ -66,26 +66,30 @@ public class InteractControllerLocal : MonoBehaviour
 
         if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit hit, pickupRange, interactLayer))
         {
-            InteractType type = hit.transform.gameObject.GetComponent<InteractItem>().type;
+            InteractItem item = hit.transform.gameObject.GetComponent<InteractItem>();
+            InteractType type = item.type;
 
             switch (type)
             {
                 case InteractType.OperationItem:
-                    interactText.SetActive(true);
+                    operationText.text = "[E] " + item.mouseOverText;
+                    operationText.gameObject.SetActive(true);
                     break;
                 case InteractType.HoldItem:
-                    holdText.SetActive(true);
+                    holdText.text = "[E] " + item.mouseOverText;
+                    holdText.gameObject.SetActive(true);
                     break;
                 case InteractType.InventoryItem:
-                    pickupText.SetActive(true);
+                    pickupText.text = "[E] " + item.mouseOverText;
+                    pickupText.gameObject.SetActive(true);
                     break;
             }
         }
         else
         {
-            holdText.SetActive(false);
-            interactText.SetActive(false);
-            pickupText.SetActive(false);
+            holdText.gameObject.SetActive(false);
+            operationText.gameObject.SetActive(false);
+            pickupText.gameObject.SetActive(false);
         }
     }
 
@@ -125,7 +129,13 @@ public class InteractControllerLocal : MonoBehaviour
 
     private void TriggerOperationItem(RaycastHit hit)
     {
-        hit.transform.GetComponent<OperationItem>().InteractWith();
+        //hit.transform.GetComponent<OperationItem>().InteractWith();
+        IInteractItem operation = hit.transform.GetComponent<IInteractItem>();
+
+        if(operation != null)
+        {
+            operation.InteractWith();
+        }
     }
 
     private void PickupHeldItem(RaycastHit hit)
@@ -242,7 +252,6 @@ public class InteractControllerLocal : MonoBehaviour
 
     void DropInventoryItem(Item item)
     {
-
         foreach (InventoryObject inventoryObject in inventoryObjects)
         {
             if (inventoryObject.item != item)
@@ -279,14 +288,10 @@ public class InteractControllerLocal : MonoBehaviour
         if (scrollInput > 0)
         {
             currentValue = (currentValue % MaxValue) + 1;
-
-            Debug.Log("Current Value: " + currentValue);
         }
         else if (scrollInput < 0)
         {
             currentValue = (currentValue - 2 + MaxValue) % MaxValue + 1;
-
-            Debug.Log("Current Value: " + currentValue);
         }
     }
 
