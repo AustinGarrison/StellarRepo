@@ -1059,7 +1059,6 @@ MonoBehaviour:
   pickupPosition: {fileID: 5625251401312552626}
   invDropItemObject: {fileID: 486024413833497395, guid: 850e159ba4485fc47a58b171c5c964ba,
     type: 3}
-  toggleInventory: 9
   crosshair: {fileID: 146270195770434910}
   holdText: {fileID: 4642498955218605297}
   interactText: {fileID: 3292391694179793231}

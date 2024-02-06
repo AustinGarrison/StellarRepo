@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbaac14ce6b513a4f9f6664da7000f76, type: 3}
+  m_Name: PrinterData
+  m_EditorClassIdentifier: 
+  initialCategories:
+  - icon: {fileID: 11400000, guid: f3dbe9372951d824cab3266e450b7dc4, type: 2}
+    itemType: 0
+    itemIndex: -1
+  - icon: {fileID: 11400000, guid: e33c77fd3a099ed47bd42a98dab35def, type: 2}
+    itemType: 0
+    itemIndex: -1
+  - icon: {fileID: 11400000, guid: 9a008f9c837d01246935e5c04067e196, type: 2}
+    itemType: 0
+    itemIndex: -1
+  - icon: {fileID: 11400000, guid: 23d21c5e79e893b498ed65c6a7529c72, type: 2}
+    itemType: 1
+    itemIndex: -1
+  currentCategories:
+  - icon: {fileID: 11400000, guid: f3dbe9372951d824cab3266e450b7dc4, type: 2}
+    itemType: 0
+    itemIndex: 0
+  - icon: {fileID: 11400000, guid: e33c77fd3a099ed47bd42a98dab35def, type: 2}
+    itemType: 0
+    itemIndex: 1
+  - icon: {fileID: 11400000, guid: 9a008f9c837d01246935e5c04067e196, type: 2}
+    itemType: 0
+    itemIndex: 2
+  - icon: {fileID: 11400000, guid: 23d21c5e79e893b498ed65c6a7529c72, type: 2}
+    itemType: 1
+    itemIndex: 3

@@ -10,7 +10,7 @@ public class InteractControllerLocal : MonoBehaviour
 
     //[SerializeField] private KeyCode pickupKey = KeyCode.E;
     //[SerializeField] private KeyCode dropKey = KeyCode.G;
-    [SerializeField] private KeyCode toggleInventory = KeyCode.Tab;
+    //[SerializeField] private KeyCode toggleInventory = KeyCode.Tab;
 
     [SerializeField] GameObject crosshair;
     [SerializeField] TextMeshProUGUI holdText;

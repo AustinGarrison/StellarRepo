@@ -5,9 +5,9 @@ public class GameInputStarMap : MonoBehaviour
 {
     public static GameInputStarMap Instance { get; private set; }
 
-    public event EventHandler OnAccelerate;
-    public event EventHandler OnCrouchAction;
-    public event EventHandler OnStandAction;
+    //public event EventHandler OnAccelerate;
+    //public event EventHandler OnCrouchAction;
+    //public event EventHandler OnStandAction;
 
     private PlayerInputActions playerInputActions;
 

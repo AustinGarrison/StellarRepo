@@ -322,23 +322,11 @@ public class Universe
         {
             return activeChunksList._activeChunks[x, y];
         }
-
-
-        if (x >= 0 && y >= 0 && x < numChunksX && y < numChunksY)
-        {
-
-
-        }
-        else
-        {
-            return default(UniverseChunk);
-        }
     }
 
     public UniverseChunkSector GetChunkSector(Vector3 worldPos)
     {
         int chunkX, chunkY;
-        int sectorX, sectorY;
 
         GetChunkXY(worldPos, out chunkX, out chunkY);
         UniverseChunk chunk = GetChunk(chunkX, chunkY);

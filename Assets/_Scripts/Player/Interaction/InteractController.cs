@@ -9,10 +9,6 @@ public class InteractController : NetworkBehaviour
     [SerializeField] private Transform pickupPosition;
     [SerializeField] GameObject invDropItemObject;
 
-    //[SerializeField] private KeyCode pickupKey = KeyCode.E;
-    //[SerializeField] private KeyCode dropKey = KeyCode.G;
-    [SerializeField] private KeyCode toggleInventory = KeyCode.Tab;
-
     [SerializeField] GameObject crosshair;
     [SerializeField] GameObject holdText;
     [SerializeField] GameObject interactText;
