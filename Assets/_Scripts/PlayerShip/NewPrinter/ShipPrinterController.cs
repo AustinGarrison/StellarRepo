@@ -23,10 +23,9 @@ namespace Printer
             printerData.Initialize();
 
             // Initialize UI
-            List<ShipPrinterIcon> itemIcons 
-                = printerCategoryUI.Initialize(printerData.currentCategories.Count, printerData.RequestIconInfo());
-            printerCategoryUI.OnPrinterIconLeftClicked += CategoryUI_OnIconLeftClick;
+            printerCategoryUI.Initialize(printerData.currentCategories.Count, printerData.RequestIconInfo());
 
+            printerCategoryUI.OnPrinterIconLeftClicked += CategoryUI_OnIconLeftClick;
             printerDescriptionUI.Initialize();
         }
 
@@ -47,12 +46,28 @@ namespace Printer
         private void PrintableClicked(ShipPrinterCategory printerCraftable)
         {
             SO_PrinterIcon item = printerCraftable.icon;
-            printerDescriptionUI.UpdateDescription(item.ItemImage, item.ItemName, item.ItemDescription);
+            printerDescriptionUI.UpdateDescription(item);
         }
 
         private void CategoryClicked(ShipPrinterCategory printerCategory)
         {
+            printerCategoryUI.ClearIcons();
+            printerData.NewCategories(printerCategory);
+            printerCategoryUI.Initialize(printerData.currentCategories.Count, printerData.RequestIconInfo());
+        }
 
+        public void ReloadInitial()
+        {
+            printerDescriptionUI.ResetDescription();
+
+            // Delete Whats Current
+            printerCategoryUI.ClearIcons();
+
+            // Initialize Data
+            printerData.Initialize();
+
+            // Initialize UI
+            printerCategoryUI.Initialize(printerData.currentCategories.Count, printerData.RequestIconInfo());
         }
     }
 }

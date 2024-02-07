@@ -18,6 +18,7 @@ namespace Printer.Model
         internal void Initialize()
         {
             currentCategories = new List<ShipPrinterCategory>();
+
             for (int i = 0; i < initialCategories.Count; i++)
             {
                 ShipPrinterCategory newCategory = initialCategories[i];
@@ -45,6 +46,20 @@ namespace Printer.Model
             return currentCategories[index];
         }
 
+        public void NewCategories(ShipPrinterCategory printerCategory)
+        {
+            currentCategories = new List<ShipPrinterCategory>();
+
+            for (int i = 0; i < printerCategory.icon.SubCategories.Count; i++)
+            {
+                ShipPrinterCategory newCategory = ShipPrinterCategory.GetEmptyPrinterCategory();
+                newCategory.icon = printerCategory.icon.SubCategories[i];
+                newCategory.itemType = printerCategory.icon.SubCategories[i].itemType;
+                newCategory.itemIndex = i;
+
+                currentCategories.Add(newCategory);
+            }
+        }
     }
 
     [Serializable]
@@ -53,6 +68,14 @@ namespace Printer.Model
         public SO_PrinterIcon icon;
         public ShipPrinterItemType itemType;
         [HideInInspector] public int itemIndex;
+
+        public static ShipPrinterCategory GetEmptyPrinterCategory()
+            => new ShipPrinterCategory
+            {
+                icon = null,
+                itemType = ShipPrinterItemType.Category,
+                itemIndex = -1,
+            };
     }
 
     public enum ShipPrinterItemType

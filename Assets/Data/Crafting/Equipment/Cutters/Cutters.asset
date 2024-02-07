@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5bdb3e13750a82a4192b292d310a902d, type: 3}
-  m_Name: Equipment
+  m_Name: Cutters
   m_EditorClassIdentifier: 
-  <ItemName>k__BackingField: Equipment
-  <ItemDescription>k__BackingField: Useful Tools
-  <ItemImage>k__BackingField: {fileID: 21300000, guid: 8bead5bf59029e0439a40376ac28665c,
+  <ItemName>k__BackingField: Cutters
+  <ItemDescription>k__BackingField: Get into where you cant
+  <ItemImage>k__BackingField: {fileID: 21300000, guid: ffaa7ba00142d5e4badd86ce771fd103,
     type: 3}
   itemType: 0
   <SubCategories>k__BackingField:
-  - {fileID: 11400000, guid: c6d0a24cf600f8d48a3d344e42a58f67, type: 2}
-  - {fileID: 11400000, guid: 515f1727ef2da154ea99fed0e3e8d4f0, type: 2}
+  - {fileID: 11400000, guid: 7bc0549b9df84a1458546c0b25b24717, type: 2}
+  - {fileID: 11400000, guid: 23d21c5e79e893b498ed65c6a7529c72, type: 2}
+  - {fileID: 11400000, guid: 1d02a076b4734ea41b657aec6558a3fa, type: 2}

@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5bdb3e13750a82a4192b292d310a902d, type: 3}
-  m_Name: Equipment
+  m_Name: HandheldLights
   m_EditorClassIdentifier: 
-  <ItemName>k__BackingField: Equipment
-  <ItemDescription>k__BackingField: Useful Tools
-  <ItemImage>k__BackingField: {fileID: 21300000, guid: 8bead5bf59029e0439a40376ac28665c,
+  <ItemName>k__BackingField: FlashLights
+  <ItemDescription>k__BackingField: See in the dark
+  <ItemImage>k__BackingField: {fileID: 21300000, guid: e3fa068d64cbab746b28e4aae3b7b5fe,
     type: 3}
   itemType: 0
   <SubCategories>k__BackingField:
-  - {fileID: 11400000, guid: c6d0a24cf600f8d48a3d344e42a58f67, type: 2}
-  - {fileID: 11400000, guid: 515f1727ef2da154ea99fed0e3e8d4f0, type: 2}
+  - {fileID: 11400000, guid: d0b83f7ffc551264690478672a8c02ad, type: 2}
+  - {fileID: 11400000, guid: 0f79aa795a043be419753b2af319c3a2, type: 2}
+  - {fileID: 11400000, guid: 9ec0e636d2439e9449d170fb05450c75, type: 2}

@@ -18,7 +18,7 @@ namespace Printer.UI
             itemIconsList = new List<ShipPrinterIcon>();
         }
 
-        internal List<ShipPrinterIcon> Initialize(int numOfCategories, List<ShipPrinterCategory> initialPrinterCategories)
+        internal void Initialize(int numOfCategories, List<ShipPrinterCategory> initialPrinterCategories)
         {
             for (int i = 0; i < numOfCategories; i++)
             {
@@ -36,8 +36,6 @@ namespace Printer.UI
                 
                 itemIconsList.Add(uiIcon);
             }
-
-            return itemIconsList;
         }
 
         private void UiIcon_OnItemLeftClicked(ShipPrinterIcon printerIcon)
@@ -68,6 +66,16 @@ namespace Printer.UI
         private void HighlightSelected(int index)
         {
             itemIconsList[index].Select();
+        }
+
+        public void ClearIcons()
+        {
+            foreach(ShipPrinterIcon obj in itemIconsList)
+            {
+                Destroy(obj.gameObject);
+            }
+
+            itemIconsList.Clear();
         }
 
     }

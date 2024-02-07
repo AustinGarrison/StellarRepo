@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Printer.Model
 {
@@ -22,10 +23,19 @@ namespace Printer.Model
 
         public ShipPrinterItemType itemType;
 
+        // If Icon is a category, list its subcategories
         [field: SerializeField]
         public List<SO_PrinterIcon> SubCategories { get; set; }
 
-
         // If Icon is a craftable, List of crafting ingredients
+        [field: SerializeField]
+        public List<CraftingIngredients> craftingIngredients { get; set; }
+    }
+
+    [System.Serializable]
+    public struct CraftingIngredients
+    {
+        public Image elementImage;
+        public float elementAmount;
     }
 }

@@ -1,3 +1,5 @@
+using Printer.Model;
+using System.ComponentModel.Design;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,11 +27,11 @@ namespace Printer.UI
             //gameObject.SetActive(false);
         }
 
-        public void UpdateDescription(Sprite image, string title, string description)
+        public void UpdateDescription(SO_PrinterIcon item)
         {
             descriptionPanel.gameObject.SetActive(true);
-            itemImage.sprite = image;
-            this.title.text = title + " - " + description;
+            itemImage.sprite = item.ItemImage;
+            this.title.text = item.ItemName + " - " + item.ItemDescription;
         }
     }
 }

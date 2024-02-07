@@ -16,4 +16,5 @@ MonoBehaviour:
   <ItemDescription>k__BackingField: Cuts Down doors
   <ItemImage>k__BackingField: {fileID: 21300000, guid: 1a69cfbf479c7b347b212d073930adbc,
     type: 3}
+  itemType: 1
   <SubCategories>k__BackingField: []

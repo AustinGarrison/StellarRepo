@@ -10,13 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5bdb3e13750a82a4192b292d310a902d, type: 3}
-  m_Name: Equipment
+  m_Name: Flashlight
   m_EditorClassIdentifier: 
-  <ItemName>k__BackingField: Equipment
-  <ItemDescription>k__BackingField: Useful Tools
-  <ItemImage>k__BackingField: {fileID: 21300000, guid: 8bead5bf59029e0439a40376ac28665c,
+  <ItemName>k__BackingField: FlashLight
+  <ItemDescription>k__BackingField: Better than Pen
+  <ItemImage>k__BackingField: {fileID: 21300000, guid: 05edb159b90d5bd4aa2af6e551e864ad,
     type: 3}
-  itemType: 0
-  <SubCategories>k__BackingField:
-  - {fileID: 11400000, guid: c6d0a24cf600f8d48a3d344e42a58f67, type: 2}
-  - {fileID: 11400000, guid: 515f1727ef2da154ea99fed0e3e8d4f0, type: 2}
+  itemType: 1
+  <SubCategories>k__BackingField: []
