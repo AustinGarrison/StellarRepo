@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69400e93b916a374c9ea8b6800fe0fd3, type: 3}
+  m_Name: UIManager
+  m_EditorClassIdentifier: 
+  hoverSound: {fileID: 8300000, guid: 32989defc7eab9a48909b8ae7e838a5b, type: 3}
+  clickSound: {fileID: 8300000, guid: ee956fc2f8e982747ac7a7fcef235ef2, type: 3}
+  notificationSound: {fileID: 8300000, guid: 2ee8cba20326d9d43b79d89b31cdc5f4, type: 3}
