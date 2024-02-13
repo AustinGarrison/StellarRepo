@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace UI
 {
@@ -50,7 +51,7 @@ namespace UI
             [Tooltip("[Required] This is the variable that you use to call specific panels.")]
             public string panelName = "My Panel";
             [Tooltip("[Required] Main panel object.")]
-            public Animator panelObject;
+            public Animator panelAnimator;
             [Tooltip("[Optional] If you want the panel manager to have tabbing capability, you can assign a panel button here.")]
             public PanelButton panelButton;
             [Tooltip("[Optional] Alternate panel button variable that supports standard buttons instead of panel buttons.")]
@@ -67,38 +68,37 @@ namespace UI
             [HideInInspector] public HotkeyEvent[] hotkeys;
         }
 
-        private void Awake()
+        void Awake()
         {
             if (panels.Count == 0)
                 return;
 
-            if (panelMode == PanelMode.MainPanel) { cachedStateLength = UIInternalTools.GetAnimatorClipLength(panels[currentPanelIndex].panelObject, "MainPanel_In"); }
-            else if (panelMode == PanelMode.SubPanel) { cachedStateLength = UIInternalTools.GetAnimatorClipLength(panels[currentPanelIndex].panelObject, "SubPanel_In"); }
+            if (panelMode == PanelMode.MainPanel) { cachedStateLength = UIInternalTools.GetAnimatorClipLength(panels[currentPanelIndex].panelAnimator, "MainPanel_In"); }
+            else if (panelMode == PanelMode.SubPanel) { cachedStateLength = UIInternalTools.GetAnimatorClipLength(panels[currentPanelIndex].panelAnimator, "SubPanel_In"); }
             else if (panelMode == PanelMode.Custom) { cachedStateLength = 1f; }
         }
 
         void OnEnable()
         {
             if (!isInitialized) { InitializePanels(); }
-            //if (ControllerManager.instance != null) { ControllerManager.instance.currentManagerIndex = managerIndex; }
 
             if (bypassAnimationOnEnable)
             {
                 for (int i = 0; i < panels.Count; i++)
                 {
-                    if (panels[i].panelObject == null)
+                    if (panels[i].panelAnimator == null)
                         continue;
 
                     if (currentPanelIndex == i)
                     {
-                        panels[i].panelObject.gameObject.SetActive(true);
-                        panels[i].panelObject.enabled = true;
-                        panels[i].panelObject.Play("Panel Instant In");
+                        panels[i].panelAnimator.gameObject.SetActive(true);
+                        panels[i].panelAnimator.enabled = true;
+                        panels[i].panelAnimator.Play("Panel Instant In");
                     }
 
                     else
                     {
-                        panels[i].panelObject.gameObject.SetActive(false);
+                        panels[i].panelAnimator.gameObject.SetActive(false);
                     }
                 }
             }
@@ -132,7 +132,7 @@ namespace UI
                 currentButton.SetSelected(true);
             }
 
-            currentPanel = panels[currentPanelIndex].panelObject;
+            currentPanel = panels[currentPanelIndex].panelAnimator;
             currentPanel.enabled = true;
             currentPanel.gameObject.SetActive(true);
 
@@ -143,9 +143,9 @@ namespace UI
 
             for (int i = 0; i < panels.Count; i++)
             {
-                if (panels[i].panelObject == null) { continue; }
+                if (panels[i].panelAnimator == null) { continue; }
                 if (panels[i].hotkeyParent != null) { panels[i].hotkeys = panels[i].hotkeyParent.GetComponentsInChildren<HotkeyEvent>(); }
-                if (i != currentPanelIndex && cullPanels) { panels[i].panelObject.gameObject.SetActive(false); }
+                if (i != currentPanelIndex && cullPanels) { panels[i].panelAnimator.gameObject.SetActive(false); }
                 if (initializeButtons)
                 {
                     string tempName = panels[i].panelName;
@@ -168,6 +168,7 @@ namespace UI
 
         public void OpenPanel(string newPanel)
         {
+
             bool catchedPanel = false;
 
             for (int i = 0; i < panels.Count; i++)
@@ -189,25 +190,14 @@ namespace UI
             if (newPanelIndex != currentPanelIndex)
             {
                 if (cullPanels) { StopCoroutine("DisablePreviousPanel"); }
-                //if (ControllerManager.instance != null) { ControllerManager.instance.currentManagerIndex = managerIndex; }
 
-                currentPanel = panels[currentPanelIndex].panelObject;
+                currentPanel = panels[currentPanelIndex].panelAnimator;
 
-                if (panels[currentPanelIndex].hotkeyParent != null)
-                {
-                    foreach (HotkeyEvent hotkeyEvent in panels[currentPanelIndex].hotkeys)
-                    {
-                        hotkeyEvent.enabled = false;
-                    }
-                }
-
-                if (panels[currentPanelIndex].panelButton != null)
-                {
-                    currentButton = panels[currentPanelIndex].panelButton;
-                }
+                if (panels[currentPanelIndex].hotkeyParent != null) { foreach (HotkeyEvent he in panels[currentPanelIndex].hotkeys) { he.enabled = false; } }
+                if (panels[currentPanelIndex].panelButton != null) { currentButton = panels[currentPanelIndex].panelButton; }
 
                 currentPanelIndex = newPanelIndex;
-                nextPanel = panels[currentPanelIndex].panelObject;
+                nextPanel = panels[currentPanelIndex].panelAnimator;
                 nextPanel.gameObject.SetActive(true);
 
                 currentPanel.enabled = true;
@@ -220,21 +210,11 @@ namespace UI
                 nextPanel.Play(panelFadeIn);
 
                 if (cullPanels) { StartCoroutine("DisablePreviousPanel"); }
-
-                if (panels[currentPanelIndex].hotkeyParent != null)
-                {
-                    foreach (HotkeyEvent he in panels[currentPanelIndex].hotkeys)
-                    {
-                        he.enabled = true;
-                    }
-                }
+                if (panels[currentPanelIndex].hotkeyParent != null) { foreach (HotkeyEvent he in panels[currentPanelIndex].hotkeys) { he.enabled = true; } }
 
                 currentButtonIndex = newPanelIndex;
 
-                if (currentButton != null)
-                {
-                    currentButton.SetSelected(false);
-                }
+                if (currentButton != null) { currentButton.SetSelected(false); }
                 if (panels[currentButtonIndex].panelButton != null)
                 {
                     nextButton = panels[currentButtonIndex].panelButton;
@@ -245,23 +225,6 @@ namespace UI
 
                 StopCoroutine("DisableAnimators");
                 StartCoroutine("DisableAnimators");
-
-            }
-        }
-
-        public void NextPanel()
-        {
-            if (currentPanelIndex <= panels.Count - 2 && !panels[currentPanelIndex + 1].disableNavigation)
-            {
-                OpenPanelByIndex(currentPanelIndex - 1);
-            }
-        }
-
-        public void PreviousPanel()
-        {
-            if (currentPanelIndex >= 1 && !panels[currentPanelIndex - 1].disableNavigation)
-            {
-                OpenPanelByIndex(currentPanelIndex - 1);
             }
         }
 
@@ -280,6 +243,22 @@ namespace UI
                     OpenPanel(panels[panelIndex].panelName);
                     break;
                 }
+            }
+        }
+
+        public void NextPanel()
+        {
+            if (currentPanelIndex <= panels.Count - 2 && !panels[currentPanelIndex + 1].disableNavigation)
+            {
+                OpenPanelByIndex(currentPanelIndex + 1);
+            }
+        }
+
+        public void PreviousPanel()
+        {
+            if (currentPanelIndex >= 1 && !panels[currentPanelIndex - 1].disableNavigation)
+            {
+                OpenPanelByIndex(currentPanelIndex - 1);
             }
         }
 
@@ -329,6 +308,72 @@ namespace UI
             }
         }
 
+        public void ShowCurrentButton()
+        {
+            if (nextButton == null) { currentButton.SetSelected(true); }
+            else { nextButton.SetSelected(true); }
+        }
+
+        public void HideCurrentButton()
+        {
+            if (nextButton == null) { currentButton.SetSelected(false); }
+            else { nextButton.SetSelected(false); }
+        }
+
+        public void AddNewItem()
+        {
+            PanelItem panel = new PanelItem();
+
+            if (panels.Count != 0 && panels[panels.Count - 1].panelAnimator != null)
+            {
+                int tempIndex = panels.Count - 1;
+
+                GameObject tempPanel = panels[tempIndex].panelAnimator.transform.parent.GetChild(tempIndex).gameObject;
+                GameObject newPanel = Instantiate(tempPanel, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+
+                newPanel.transform.SetParent(panels[tempIndex].panelAnimator.transform.parent, false);
+                newPanel.gameObject.name = "New Panel " + tempIndex.ToString();
+
+                panel.panelName = "New Panel " + tempIndex.ToString();
+                panel.panelAnimator = newPanel.GetComponent<Animator>();
+
+                if (panels[tempIndex].panelButton != null)
+                {
+                    GameObject tempButton = panels[tempIndex].panelButton.transform.parent.GetChild(tempIndex).gameObject;
+                    GameObject newButton = Instantiate(tempButton, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+
+                    newButton.transform.SetParent(panels[tempIndex].panelButton.transform.parent, false);
+                    newButton.gameObject.name = "New Panel " + tempIndex.ToString();
+
+                    panel.panelButton = newButton.GetComponent<PanelButton>();
+                }
+
+                else if (panels[tempIndex].altPanelButton != null)
+                {
+                    GameObject tempButton = panels[tempIndex].altPanelButton.transform.parent.GetChild(tempIndex).gameObject;
+                    GameObject newButton = Instantiate(tempButton, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+
+                    newButton.transform.SetParent(panels[tempIndex].panelButton.transform.parent, false);
+                    newButton.gameObject.name = "New Panel " + tempIndex.ToString();
+
+                    panel.altPanelButton = newButton.GetComponent<UIButtonManager>();
+                }
+
+                else if (panels[tempIndex].altBoxButton != null)
+                {
+                    GameObject tempButton = panels[tempIndex].altBoxButton.transform.parent.GetChild(tempIndex).gameObject;
+                    GameObject newButton = Instantiate(tempButton, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+
+                    newButton.transform.SetParent(panels[tempIndex].panelButton.transform.parent, false);
+                    newButton.gameObject.name = "New Panel " + tempIndex.ToString();
+
+                    panel.altBoxButton = newButton.GetComponent<BoxButtonManager>();
+                }
+            }
+
+            panels.Add(panel);
+        }
+
         IEnumerator DisablePreviousPanel()
         {
             if (updateMode == UpdateMode.UnscaledTime) { yield return new WaitForSecondsRealtime(cachedStateLength * animationSpeed); }
@@ -339,7 +384,7 @@ namespace UI
                 if (i == currentPanelIndex)
                     continue;
 
-                panels[i].panelObject.gameObject.SetActive(false);
+                panels[i].panelAnimator.gameObject.SetActive(false);
             }
         }
 

@@ -50,7 +50,7 @@ namespace UI
         {
             if(panelManager != null)
             {
-                disableAfter = UIInternalTools.GetAnimatorClipLength(panelManager.panels[panelManager.currentPanelIndex].panelObject, "MainPanel_Out");
+                disableAfter = UIInternalTools.GetAnimatorClipLength(panelManager.panels[panelManager.currentPanelIndex].panelAnimator, "MainPanel_Out");
             }
 
             if (continueButton != null)
