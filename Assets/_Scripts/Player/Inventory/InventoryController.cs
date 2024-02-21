@@ -20,7 +20,6 @@ namespace Player.Interaction
         [SerializeField] private InteractControllerLocal interactController;
 
         [SerializeField] private Transform holdPostion;
-        internal bool holdingObject;
 
         [Header("HUD")]
         [SerializeField] private GameObject crosshair;
@@ -43,7 +42,7 @@ namespace Player.Interaction
         [SerializeField] private float scrollingCooldown = 0.4f;
         private const int minScrollValue = 1;
         private const int maxScrollValue = 5;
-        private int currentScrollValue = 1;
+        public int currentScrollValue = 1;
         public GameObject objectInHand;
 
         // Helpers
@@ -52,9 +51,18 @@ namespace Player.Interaction
 
         internal void Init()
         {
-            GameInputPlayer.Instance.OnResourceHUDToggled += GameInput_OnResourceHUDToggled; ;
-            GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction; ;
+            //Turns off inventory if its on
+            if (invPanel.activeSelf)
+                ToggleResourceUI();
+
+            GameInputPlayer.Instance.OnResourceHUDToggled += GameInput_OnResourceHUDToggled;
+            GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
+
+            interactController.OnHoldItemInteract += InteractController_OnHoldItemInteract;
+            interactController.OnInventoryItemInteract += InteractController_OnResourceItemInteract;
         }
+
+        #region EventArgs
 
         private void GameInput_OnResourceHUDToggled(object sender, EventArgs e)
         {
@@ -66,16 +74,6 @@ namespace Player.Interaction
             DropHeldItem();
         }
 
-        private void Start()
-        {
-            //Turns off inventory if its on
-            if (invPanel.activeSelf)
-                ToggleResourceUI();
-
-            interactController.OnHoldItemInteract += InteractController_OnHoldItemInteract;
-            interactController.OnInventoryItemInteract += InteractController_OnResourceItemInteract;
-        }
-
         private void InteractController_OnHoldItemInteract(object sender, HoldItemEventArgs e)
         {
             FindEmptyHotbarSlot(e.HoldItem);
@@ -85,6 +83,8 @@ namespace Player.Interaction
         {
             AddResource(e.InventoryItem.itemScriptable);
         }
+
+        #endregion
 
         private void Update()
         {
@@ -122,6 +122,10 @@ namespace Player.Interaction
             {
                 objectInHand = inventorySlots[currentScrollValue - 1].heldItem.gameObject;
             }
+            if (inventorySlots[currentScrollValue - 1].heldItem == null)
+            {
+                objectInHand = null;
+            }
 
             UpdateBothSlotUIHighlight(currentScrollValue, previousValue);
             DisableUnselectedItems();
@@ -139,44 +143,10 @@ namespace Player.Interaction
 
         private void UpdateBothSlotUIHighlight(int currentValue, int previousValue)
         {
-
             inventorySlots[previousValue - 1].slot.StartCoroutine("SetNormal");
             inventorySlots[currentValue - 1].slot.StartCoroutine("SetHighlight");
         }
 
-
-        internal void ToggleResourceUI()
-        {
-            if (invPanel.activeSelf)
-            {
-                invPanel.SetActive(false);
-                crosshair.SetActive(true);
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-            else if (!invPanel.activeSelf)
-            {
-
-                UpdateInventoryList();
-                invPanel.SetActive(true);
-                crosshair.SetActive(false);
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-        }
-
-        internal void UpdateInventoryList()
-        {
-            foreach (Transform child in UIinvObjectHolder)
-                Destroy(child.gameObject);
-
-            foreach (ResourceObject inventoryObject in resourceObjects)
-            {
-                GameObject obj = Instantiate(UIInvObjectPrefab, UIinvObjectHolder);
-                obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = inventoryObject.item.itemName + " - " + inventoryObject.amount;
-                obj.GetComponent<Button>().onClick.AddListener(delegate { DropResourceItem(inventoryObject.item); });
-            }
-        }
 
         private void DisableUnselectedItems()
         {
@@ -193,20 +163,6 @@ namespace Player.Interaction
         {
             if(inventorySlots[currentScrollValue - 1].heldItem  != null)
                 inventorySlots[currentScrollValue - 1].heldItem.gameObject.SetActive(true);
-        }
-
-        internal void AddResource(ItemSO newItem)
-        {
-            foreach (ResourceObject inventoryObject in resourceObjects)
-            {
-                if (inventoryObject.item == newItem)
-                {
-                    inventoryObject.amount++;
-                    return;
-                }
-            }
-
-            resourceObjects.Add(new ResourceObject() { item = newItem, amount = 1 });
         }
 
         internal void FindEmptyHotbarSlot(HoldItem item)
@@ -246,6 +202,9 @@ namespace Player.Interaction
 
                             int previousSlot = currentScrollValue;
                             currentScrollValue = slotIndex + 1;
+
+                            // Change currenly selected to the new slot
+                            ChangeHotbarSlot(previousSlot);
 
                             // Set Slot Highlight
                             UpdateBothSlotUIHighlight(currentScrollValue, previousSlot);
@@ -291,7 +250,87 @@ namespace Player.Interaction
                 item.GetComponent<Collider>().enabled = false;
 
             objectInHand = item.transform.gameObject;
-            holdingObject = true;
+        }
+
+        internal void DropHeldItem()
+        {
+            Debug.Log("Before if (!holdingObject)");
+
+            if (objectInHand = null)
+                return;
+
+            Debug.Log("After if (!holdingObject)");
+
+            //HoldItem holdItem = objectInHand.GetComponent<HoldItem>();
+            HoldItem holdItem = inventorySlots[currentScrollValue - 1].heldItem;
+            inventorySlots[currentScrollValue - 1].heldItem = null;
+
+            inventorySlots[currentScrollValue - 1].slot.DisableSlotIcons();
+
+            holdItem.transform.parent = worldHeldItemParent;
+            holdItem.isInInventory = false;
+
+            if (holdItem.GetComponent<Rigidbody>() != null)
+                holdItem.GetComponent<Rigidbody>().isKinematic = false;
+
+            if (holdItem.GetComponent<Collider>() != null)
+                holdItem.GetComponent<Collider>().enabled = true;
+
+            objectInHand = null;
+        }
+
+        IEnumerator ScrollCooldownTimer()
+        {
+            yield return new WaitForSecondsRealtime(scrollingCooldown);
+            isInCooldown = false;
+        }
+
+        #region Resources
+        internal void UpdateResourceList()
+        {
+            foreach (Transform child in UIinvObjectHolder)
+                Destroy(child.gameObject);
+
+            foreach (ResourceObject inventoryObject in resourceObjects)
+            {
+                GameObject obj = Instantiate(UIInvObjectPrefab, UIinvObjectHolder);
+                obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = inventoryObject.item.itemName + " - " + inventoryObject.amount;
+                obj.GetComponent<Button>().onClick.AddListener(delegate { DropResourceItem(inventoryObject.item); });
+            }
+        }
+
+        internal void ToggleResourceUI()
+        {
+            if (invPanel.activeSelf)
+            {
+                invPanel.SetActive(false);
+                crosshair.SetActive(true);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else if (!invPanel.activeSelf)
+            {
+
+                UpdateResourceList();
+                invPanel.SetActive(true);
+                crosshair.SetActive(false);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
+
+        internal void AddResource(ItemSO newItem)
+        {
+            foreach (ResourceObject inventoryObject in resourceObjects)
+            {
+                if (inventoryObject.item == newItem)
+                {
+                    inventoryObject.amount++;
+                    return;
+                }
+            }
+
+            resourceObjects.Add(new ResourceObject() { item = newItem, amount = 1 });
         }
 
         void DropResourceItem(ItemSO item)
@@ -305,7 +344,7 @@ namespace Player.Interaction
                 {
                     resourceObject.amount--;
                     DropResource(resourceObject, transform.position + transform.forward);
-                    UpdateInventoryList();
+                    UpdateResourceList();
                     return;
                 }
 
@@ -313,7 +352,7 @@ namespace Player.Interaction
                 {
                     resourceObjects.Remove(resourceObject);
                     DropResource(resourceObject, transform.position + transform.forward);
-                    UpdateInventoryList();
+                    UpdateResourceList();
                     return;
                 }
             }
@@ -325,35 +364,7 @@ namespace Player.Interaction
             drop.name = itemSO.item.name;
             drop.GetComponent<InventoryItem>().itemScriptable.interactText = itemSO.item.interactText;
         }
-
-        internal void DropHeldItem()
-        {
-            if (!holdingObject)
-                return;
-            HoldItem holdItem = objectInHand.GetComponent<HoldItem>();
-
-            DropHeldObject(holdItem, worldHeldItemParent);
-            holdingObject = false;
-            objectInHand = null;
-        }
-
-        private void DropHeldObject(HoldItem item, Transform worldObjects)
-        {
-            item.transform.parent = worldObjects;
-            item.isInInventory = false;
-
-            if (item.GetComponent<Rigidbody>() != null)
-                item.GetComponent<Rigidbody>().isKinematic = false;
-
-            if (item.GetComponent<Collider>() != null)
-                item.GetComponent<Collider>().enabled = true;
-        }
-
-        IEnumerator ScrollCooldownTimer()
-        {
-            yield return new WaitForSecondsRealtime(scrollingCooldown);
-            isInCooldown = false;
-        }
+        #endregion
     }
 
     [System.Serializable]

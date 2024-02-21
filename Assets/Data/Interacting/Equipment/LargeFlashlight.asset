@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96c76fe30aa315044803732e2597804e, type: 3}
-  m_Name: Gray Square
+  m_Name: LargeFlashlight
   m_EditorClassIdentifier: 
-  itemName: Gray Square
-  prefab: {fileID: 4044985465545222620, guid: 1b0b3d19d6a976c4ebac302234a3d873, type: 3}
-  interactText: Pickup Grey Square
+  itemName: Large Flashlight
+  prefab: {fileID: 3307873513287272977, guid: b70df53901b02e74fbbfa1cb4e5b8440, type: 3}
+  interactText: Pickup Large Flashlight

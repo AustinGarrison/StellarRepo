@@ -20,12 +20,20 @@ namespace Player.Interaction
         [Range(1, 15)] public float fadingMultiplier = 8;
         public HoldItemHandType slotType;
 
+        internal void DisableSlotIcons()
+        {
+            foreach (var icon in invItemIcons)
+            {
+                icon.enabled = false;
+            }
+        }
+
         internal void UpdateSlotIcons(Sprite iconImage)
         {
-            foreach (var item in invItemIcons)
+            foreach (var icon in invItemIcons)
             {
-                item.sprite = iconImage;
-                item.enabled = true;
+                icon.sprite = iconImage;
+                icon.enabled = true;
             }
         }
 
