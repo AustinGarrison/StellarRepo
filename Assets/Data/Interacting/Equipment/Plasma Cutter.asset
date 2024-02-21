@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca166965d467f0449b0425d9a2d98177, type: 3}
-  m_Name: BlueSquare
+  m_Script: {fileID: 11500000, guid: 96c76fe30aa315044803732e2597804e, type: 3}
+  m_Name: Plasma Cutter
   m_EditorClassIdentifier: 
-  itemName: BlueSquare
-  prefab: {fileID: 7909434505053490481, guid: f23761f00f90fd8469c395f922e810ff, type: 3}
-  interactText: Pickup
+  itemName: Plasma Cutter
+  prefab: {fileID: 0}
+  interactText: Grab Plasma Cutter

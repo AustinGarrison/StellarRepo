@@ -12,7 +12,7 @@ public class GameInputPlayer : MonoBehaviour
     public event EventHandler OnStandAction;
     public event EventHandler OnInteractAction;
     public event EventHandler OnAltInteractAction;
-    public event EventHandler OnInventoryToggled;
+    public event EventHandler OnResourceHUDToggled;
 
     public enum PlayerBinding
     {
@@ -69,7 +69,7 @@ public class GameInputPlayer : MonoBehaviour
 
     private void InventoryToggle_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        OnInventoryToggled?.Invoke(this, EventArgs.Empty);
+        OnResourceHUDToggled?.Invoke(this, EventArgs.Empty);
     }
 
     public float GetAccelerating()

@@ -2,11 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InventoryItem : InteractItem
+namespace Player.Interaction
 {
-    public override void InteractWith()
+    // Items that are not equipment. Can be dropped or brought back to player ship. Have no utility use.
+    public class InventoryItem : InteractItem
     {
-        //base.InteractWith(); // Doesnt spawn player when active?
-        Debug.Log("InventoryItem/InteractWith");
+        private void Awake()
+        {
+            interactType = InteractType.InventoryItem;
+        }
+        public override void InteractWith(InteractControllerLocal player)
+        {
+            //base.InteractWith(); // Doesnt spawn player when active?
+            Debug.Log("InventoryItem/InteractWith");
+        }
     }
 }

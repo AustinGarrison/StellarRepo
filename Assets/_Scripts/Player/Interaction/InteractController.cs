@@ -60,7 +60,7 @@ public class InteractController : NetworkBehaviour
     {
         GameInputPlayer.Instance.OnInteractAction += GameInput_OnInteractAction;
         GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
-        GameInputPlayer.Instance.OnInventoryToggled += GameInput_OnInventoryToggled;
+        GameInputPlayer.Instance.OnResourceHUDToggled += GameInput_OnInventoryToggled;
         _cameraTransform = Camera.main.transform;
         initialized = true;
     }
@@ -73,7 +73,7 @@ public class InteractController : NetworkBehaviour
 
         if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit hit, pickupRange, interactLayer))
         {
-            InteractType type = hit.transform.gameObject.GetComponent<InteractItem>().type;
+            InteractType type = hit.transform.gameObject.GetComponent<InteractItem>().interactType;
 
             switch (type)
             {
@@ -100,7 +100,7 @@ public class InteractController : NetworkBehaviour
     {
         if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit hit, pickupRange, interactLayer))
         {
-            InteractType type = hit.transform.gameObject.GetComponent<InteractItem>().type;
+            InteractType type = hit.transform.gameObject.GetComponent<InteractItem>().interactType;
             switch (type)
             {
                 case InteractType.OperationItem:
@@ -131,7 +131,8 @@ public class InteractController : NetworkBehaviour
 
     private void TriggerOperationItem(RaycastHit hit)
     {
-        hit.transform.GetComponent<OperationItem>().InteractWith();
+        // Disabled because Interactwith takes in (this) which is current a non networked InteractController
+        //hit.transform.GetComponent<OperationItem>().InteractWith();
     }
 
     private void PickupHeldItem(RaycastHit hit)
@@ -163,7 +164,7 @@ public class InteractController : NetworkBehaviour
         DespawnObjectServer(hit.transform.gameObject);
     }
 
-    private void AddToinventory(Item newItem)
+    private void AddToinventory(ItemSO newItem)
     {
         foreach (InventoryObject inventoryObject in inventoryObjects)
         {
@@ -265,7 +266,7 @@ public class InteractController : NetworkBehaviour
         }
     }
 
-    void DropInventoryItem(Item item)
+    void DropInventoryItem(ItemSO item)
     {
 
         foreach (InventoryObject inventoryObject in inventoryObjects)
@@ -320,7 +321,7 @@ public class InteractController : NetworkBehaviour
     [System.Serializable]
     public class InventoryObject 
     {
-        public Item item;
+        public ItemSO item;
         public int amount;
     }
 }

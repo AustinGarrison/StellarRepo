@@ -15,11 +15,12 @@ namespace Printer.UI
 
         private void Awake()
         {
-            itemIconsList = new List<ShipPrinterIcon>();
         }
 
         internal void Initialize(int numOfCategories, List<ShipPrinterCategory> initialPrinterCategories)
         {
+            itemIconsList = new List<ShipPrinterIcon>();
+
             for (int i = 0; i < numOfCategories; i++)
             {
                 ShipPrinterCategory category = initialPrinterCategories[i];
@@ -33,7 +34,7 @@ namespace Printer.UI
 
                 uiIcon.OnItemRightClicked += UiIcon_OnRightMouseBtnClick;
                 uiIcon.OnItemLeftClicked += UiIcon_OnItemLeftClicked;
-                
+
                 itemIconsList.Add(uiIcon);
             }
         }

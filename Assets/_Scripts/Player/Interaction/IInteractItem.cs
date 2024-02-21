@@ -1,4 +1,4 @@
 public interface IInteractItem
 {
-    void InteractWith();
+    void InteractWith(InteractControllerLocal player);
 }

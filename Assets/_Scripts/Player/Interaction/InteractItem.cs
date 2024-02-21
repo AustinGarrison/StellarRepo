@@ -9,9 +9,9 @@ public enum InteractType
 
 public class InteractItem : MonoBehaviour, IInteractItem
 {
-    public Item itemScriptable;
-    public InteractType type;
-    public string mouseOverText;
 
-    public virtual void InteractWith() { }
+    [ReadOnlyRunTime] public ItemSO itemScriptable;
+    [HideInInspector] public InteractType interactType;
+
+    public virtual void InteractWith(InteractControllerLocal player) { }
 }

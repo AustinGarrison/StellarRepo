@@ -1,4 +1,5 @@
 using KinematicCharacterController;
+using Player.Interaction;
 using UnityEngine;
 
 namespace CallSOS
@@ -38,7 +39,8 @@ namespace CallSOS
         //Private
         private KinematicCharacterMotor Motor;
         private CameraControllerLocal cameraController;
-        private InteractControllerLocal inventoryController;
+        private InteractControllerLocal interactController;
+        private InventoryController inventoryController;
         private Camera playerCamera;
         private Collider[] _probedColliders = new Collider[8];
         private RaycastHit[] _probedHits = new RaycastHit[8];
@@ -52,7 +54,7 @@ namespace CallSOS
         private Vector3 _internalVelocityAdd = Vector3.zero;
         private bool _shouldBeCrouching = false;
         private bool _isCrouching = false;
-        private bool initialized = false;
+        private bool isInitialized = false;
 
         private void Awake()
         {
@@ -87,7 +89,10 @@ namespace CallSOS
             cameraController = playerCamera.GetComponent<CameraControllerLocal>();
             cameraController.BaseAwake();
 
-            inventoryController = GetComponent<InteractControllerLocal>();
+            interactController = GetComponent<InteractControllerLocal>();
+            interactController.Init();
+
+            inventoryController = GetComponent<InventoryController>();
             inventoryController.Init();
 
             // Tell camera to follow transform
@@ -97,11 +102,12 @@ namespace CallSOS
             cameraController.IgnoredColliders.Clear();
             cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
 
-            initialized = true;
+            isInitialized = true;
         }
 
         private void Update()
         {
+            if (!isInitialized) return;
 
             HandleMovement();
             HandleCharacterInput();

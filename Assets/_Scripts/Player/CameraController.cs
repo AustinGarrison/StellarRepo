@@ -54,7 +54,7 @@ public class CameraController : NetworkBehaviour
 
     private const int MaxObstructions = 32;
 
-    void OnValidate()
+    new void OnValidate()
     {
         DefaultDistance = Mathf.Clamp(DefaultDistance, MinDistance, MaxDistance);
         DefaultVerticalAngle = Mathf.Clamp(DefaultVerticalAngle, MinVerticalAngle, MaxVerticalAngle);

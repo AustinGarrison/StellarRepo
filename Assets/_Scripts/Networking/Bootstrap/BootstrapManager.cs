@@ -26,6 +26,7 @@ public class BootstrapManager : MonoBehaviour
         instance = this;
     }
 
+    [System.Obsolete]
     private void Start()
     {
         LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
@@ -64,6 +65,7 @@ public class BootstrapManager : MonoBehaviour
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
+    [System.Obsolete]
     private void OnLobbyEntered(LobbyEnter_t callback)
     {
         CurrentLobbyID = callback.m_ulSteamIDLobby;
@@ -87,6 +89,7 @@ public class BootstrapManager : MonoBehaviour
         }
     }
 
+    [System.Obsolete]
     public static void LeaveLobby()
     {
         SteamMatchmaking.LeaveLobby(new CSteamID(CurrentLobbyID));

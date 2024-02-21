@@ -24,7 +24,6 @@ public class CursorController : MonoBehaviour
     }
 
     [SerializeField] CursorMapping[] cursorMappings = null;
-    [SerializeField] float raycastRadius = 1f;
 
     public bool useCursors = false;
     bool isDraggingUI = false;

@@ -8,8 +8,14 @@ public class WorldSpaceGraphicRaycaster : GraphicRaycaster
 {
     public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
     {
-        //Set middle screen pos or you can set variable on start and use it
-        eventData.position = new(Screen.width / 2, Screen.height / 2);
+        // Check if the canvas is a world-space canvas
+        Canvas canvas = GetComponent<Canvas>();
+        if (canvas.renderMode == RenderMode.WorldSpace)
+        {
+            // Set the pointer event position to the center of the screen
+            eventData.position = new Vector2(Screen.width / 2, Screen.height / 2);
+        }
+
         base.Raycast(eventData, resultAppendList);
     }
 }

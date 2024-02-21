@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShipNavigationOperation : InteractItem, IInteractItem
 {
-    public override void InteractWith()
+    public override void InteractWith(InteractControllerLocal player)
     {
         Debug.Log("I am the Navigation");
     }
