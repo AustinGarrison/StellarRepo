@@ -24,15 +24,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "MouseScrollY",
-                    "type": "PassThrough",
-                    "id": "38236d96-bed4-44a5-9424-c042d15e98e3",
-                    "expectedControlType": "Axis",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Jump",
                     "type": "Value",
                     "id": "642108c6-ca7b-425f-885f-66ceb1dccc29",
@@ -72,6 +63,24 @@
                     "name": "InventoryToggle",
                     "type": "Value",
                     "id": "48f6d2b5-b27a-4578-9ce8-111807a86dd7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MouseScrollY",
+                    "type": "PassThrough",
+                    "id": "38236d96-bed4-44a5-9424-c042d15e98e3",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Sprint",
+                    "type": "Value",
+                    "id": "b0fe1354-7054-4158-8983-a9b88c10723a",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -191,17 +200,6 @@
                 },
                 {
                     "name": "",
-                    "id": "0094b47e-1a1e-49f7-b796-adf00174fa10",
-                    "path": "<Mouse>/scroll/y",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "MouseScrollY",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "63f1c93c-9fac-4c47-a014-a389155f7dc7",
                     "path": "<Keyboard>/space",
                     "interactions": "",
@@ -252,6 +250,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "AltInteract",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0094b47e-1a1e-49f7-b796-adf00174fa10",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MouseScrollY",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5135af66-b086-4fce-94f1-ca256fe300fc",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

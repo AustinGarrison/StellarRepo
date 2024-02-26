@@ -25,11 +25,12 @@ namespace Player.Interaction
         [SerializeField] private GameObject crosshair;
         [SerializeField] private GameObject UIInvObjectPrefab;
         [SerializeField] private GameObject invPanel;
-
         [SerializeField] private Transform UIinvObjectHolder;
-        public List<ResourceObject> resourceObjects = new List<ResourceObject>();
 
-        public InventorySlotInfo[] inventorySlots = new InventorySlotInfo[0];
+        [Header("Resource and Equipment Holders")]
+        public List<ResourceObject> resourceObjects = new List<ResourceObject>();
+        public InventorySlotInfo[] hotbarSlots = new InventorySlotInfo[0];
+        public GameObject objectInHand;
 
         [System.Serializable]
         public struct InventorySlotInfo
@@ -38,12 +39,11 @@ namespace Player.Interaction
             public InventorySlot slot;
         }
 
-        // Scrolling
+        [Header("Scrolling")]
         [SerializeField] private float scrollingCooldown = 0.4f;
         private const int minScrollValue = 1;
         private const int maxScrollValue = 5;
         public int currentScrollValue = 1;
-        public GameObject objectInHand;
 
         // Helpers
         bool isInCooldown = false;
@@ -96,36 +96,35 @@ namespace Player.Interaction
             if (isInCooldown) { return; }
 
             float scrollInput = GameInputPlayer.Instance.GetScrollAxis() / 1000;
-            int previousValue = 0;
 
             if (scrollInput == 0) return;
-            else if (scrollInput > 0)
+
+            int previousValue = 0;
+            previousValue = currentScrollValue;
+
+            if (scrollInput > 0)
             {
-                previousValue = currentScrollValue;
                 currentScrollValue = (currentScrollValue % maxScrollValue) + 1;
 
-                ChangeHotbarSlot(previousValue);
 
             }
             else if (scrollInput < 0)
             {
-                previousValue = currentScrollValue;
                 currentScrollValue = (currentScrollValue - 2 + maxScrollValue) % maxScrollValue + 1;
-
-                ChangeHotbarSlot(previousValue);
             }
+
+
+            ChangeHotbarSlot(previousValue);
         }
 
         private void ChangeHotbarSlot(int previousValue)
         {
-            if (inventorySlots[currentScrollValue - 1].heldItem != null)
-            {
-                objectInHand = inventorySlots[currentScrollValue - 1].heldItem.gameObject;
-            }
-            if (inventorySlots[currentScrollValue - 1].heldItem == null)
-            {
+            if (hotbarSlots[currentScrollValue - 1].heldItem != null)  
+                objectInHand = hotbarSlots[currentScrollValue - 1].heldItem.gameObject;
+
+            if (hotbarSlots[currentScrollValue - 1].heldItem == null)
                 objectInHand = null;
-            }
+            
 
             UpdateBothSlotUIHighlight(currentScrollValue, previousValue);
             DisableUnselectedItems();
@@ -138,19 +137,19 @@ namespace Player.Interaction
 
         private void UpdateCurrentSlotUIHighlight(int currentValue)
         {
-            inventorySlots[currentValue - 1].slot.StartCoroutine("SetHighlight");
+            hotbarSlots[currentValue - 1].slot.StartCoroutine("SetHighlight");
         }
 
         private void UpdateBothSlotUIHighlight(int currentValue, int previousValue)
         {
-            inventorySlots[previousValue - 1].slot.StartCoroutine("SetNormal");
-            inventorySlots[currentValue - 1].slot.StartCoroutine("SetHighlight");
+            hotbarSlots[previousValue - 1].slot.StartCoroutine("SetNormal");
+            hotbarSlots[currentValue - 1].slot.StartCoroutine("SetHighlight");
         }
 
 
         private void DisableUnselectedItems()
         {
-            foreach (var item in inventorySlots)
+            foreach (var item in hotbarSlots)
             {
                 if(item.heldItem != null)
                 {
@@ -161,8 +160,8 @@ namespace Player.Interaction
 
         private void EnableCurrentItem()
         {
-            if(inventorySlots[currentScrollValue - 1].heldItem  != null)
-                inventorySlots[currentScrollValue - 1].heldItem.gameObject.SetActive(true);
+            if(hotbarSlots[currentScrollValue - 1].heldItem  != null)
+                hotbarSlots[currentScrollValue - 1].heldItem.gameObject.SetActive(true);
         }
 
         internal void FindEmptyHotbarSlot(HoldItem item)
@@ -177,28 +176,28 @@ namespace Player.Interaction
             if(item.handType == HoldItemHandType.OneHanded)
             {
                 // Currently Selected slot is open, and not two handed slot
-                if (inventorySlots[currentScrollValue - 1].heldItem == null && currentScrollValue != twoHandedSlot)
+                if (hotbarSlots[currentScrollValue - 1].heldItem == null && currentScrollValue != twoHandedSlot)
                 {
-                    inventorySlots[currentScrollValue - 1].heldItem = item;
-                    inventorySlots[currentScrollValue - 1].slot.UpdateSlotIcons(item.iconImage);
+                    hotbarSlots[currentScrollValue - 1].heldItem = item;
+                    hotbarSlots[currentScrollValue - 1].slot.UpdateSlotIcons(item.iconImage);
 
                     // Set Slot Highlight, previous value doesnt matter
                     UpdateCurrentSlotUIHighlight(currentScrollValue);
 
-                    MoveItemToPlayer(item);
+                    MoveItemToPlayerHand(item);
                 }
                 else
                 {
                     bool foundSlot = false;
 
                     // Loop through all slots to find first open
-                    for (int slotIndex = 0; slotIndex < inventorySlots.Length; slotIndex++)
+                    for (int slotIndex = 0; slotIndex < hotbarSlots.Length; slotIndex++)
                     {
                         // Currently Selected slot is open
-                        if (inventorySlots[slotIndex].heldItem == null)
+                        if (hotbarSlots[slotIndex].heldItem == null)
                         {
-                            inventorySlots[slotIndex].heldItem = item;
-                            inventorySlots[slotIndex].slot.UpdateSlotIcons(item.iconImage);
+                            hotbarSlots[slotIndex].heldItem = item;
+                            hotbarSlots[slotIndex].slot.UpdateSlotIcons(item.iconImage);
 
                             int previousSlot = currentScrollValue;
                             currentScrollValue = slotIndex + 1;
@@ -211,7 +210,7 @@ namespace Player.Interaction
 
                             foundSlot = true;
 
-                            MoveItemToPlayer(item);
+                            MoveItemToPlayerHand(item);
 
                             // finished with loop
                             break;
@@ -229,43 +228,55 @@ namespace Player.Interaction
             }
             if (item.handType == HoldItemHandType.TwoHanded)
             {
-                return;
+                if (hotbarSlots[twoHandedSlot - 1].heldItem == null)
+                {
+                    hotbarSlots[twoHandedSlot - 1].heldItem = item;
+                    hotbarSlots[twoHandedSlot - 1].slot.UpdateSlotIcons(item.iconImage);
+
+                    // Set Slot Highlight, previous value doesnt matter
+                    UpdateCurrentSlotUIHighlight(twoHandedSlot);
+
+                    MoveItemToPlayerHand(item);
+                }
+                else
+                {
+                    Debug.Log("Two Handed Is Full");
+                }
             }
         }
 
-
-        private void MoveItemToPlayer(HoldItem item)
+        private void MoveItemToPlayerHand(HoldItem holdItem)
         {
-            item.transform.SetParent(holdPostion);
-            item.transform.position = Vector3.zero;
-            item.transform.localPosition = item.GetComponent<HoldItem>().holdPositionOffset;
-            item.transform.rotation = holdPostion.rotation;
+            holdItem.transform.SetParent(holdPostion);
+            holdItem.transform.position = Vector3.zero;
+            holdItem.transform.localPosition = holdItem.GetComponent<HoldItem>().holdPositionOffset;
+            holdItem.transform.rotation = holdPostion.rotation;
 
-            item.isInInventory = true;
+            holdItem.isInInventory = true;
 
-            if (item.GetComponent<Rigidbody>() != null)
-                item.GetComponent<Rigidbody>().isKinematic = true;
+            if (holdItem.GetComponent<Rigidbody>() != null)
+                holdItem.GetComponent<Rigidbody>().isKinematic = true;
 
-            if (item.GetComponent<Collider>() != null)
-                item.GetComponent<Collider>().enabled = false;
+            if (holdItem.GetComponent<Collider>() != null)
+                holdItem.GetComponent<Collider>().enabled = false;
 
-            objectInHand = item.transform.gameObject;
+            objectInHand = holdItem.transform.gameObject;
         }
 
         internal void DropHeldItem()
         {
-            Debug.Log("Before if (!holdingObject)");
+            if (objectInHand == null) return;
 
-            if (objectInHand = null)
+            HoldItem holdItem = hotbarSlots[currentScrollValue - 1].heldItem;
+
+            if (holdItem == null)
+            {
+                Debug.LogError("Tried to drop, but HoldItem is null");
                 return;
+            }
 
-            Debug.Log("After if (!holdingObject)");
-
-            //HoldItem holdItem = objectInHand.GetComponent<HoldItem>();
-            HoldItem holdItem = inventorySlots[currentScrollValue - 1].heldItem;
-            inventorySlots[currentScrollValue - 1].heldItem = null;
-
-            inventorySlots[currentScrollValue - 1].slot.DisableSlotIcons();
+            hotbarSlots[currentScrollValue - 1].heldItem = null;
+            hotbarSlots[currentScrollValue - 1].slot.DisableSlotIcons();
 
             holdItem.transform.parent = worldHeldItemParent;
             holdItem.isInInventory = false;

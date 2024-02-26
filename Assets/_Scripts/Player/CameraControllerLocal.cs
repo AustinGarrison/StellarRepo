@@ -54,6 +54,9 @@ public class CameraControllerLocal : MonoBehaviour
 
     private const int MaxObstructions = 32;
 
+    public Vector3 HUDMovement { get { return hudMovement; } }
+    internal Vector3 hudMovement;
+
     void OnValidate()
     {
         DefaultDistance = Mathf.Clamp(DefaultDistance, MinDistance, MaxDistance);

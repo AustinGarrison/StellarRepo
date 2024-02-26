@@ -1,6 +1,4 @@
-using CallSOS;
-using System.Collections;
-using System.Collections.Generic;
+using CallSOS.Player;
 using UnityEngine;
 using UnityEngine.Events;
 

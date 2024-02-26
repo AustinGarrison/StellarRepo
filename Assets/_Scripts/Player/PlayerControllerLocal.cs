@@ -1,20 +1,34 @@
 using KinematicCharacterController;
 using Player.Interaction;
+using System;
 using UnityEngine;
 
-namespace CallSOS
+namespace CallSOS.Player
 {
+    public enum PlayerState
+    {
+        Walking,
+        Crouching,
+        Sprinting
+    }
+
     public class PlayerControllerLocal : MonoBehaviour, ICharacterController
     {
 
         [Header("Stable Movement")]
-        public float MaxStableMoveSpeed = 10f;
         public float StableMovementSharpness = 15f;
         public float OrientationSharpness = 10f;
         public OrientationMethod OrientationMethod = OrientationMethod.TowardsCamera;
 
+        [Header("Walking")]
+        public float WalkingSpeed = 5f;
+
+        [Header("Crouching")]
+        public float CrouchingSpeed = 3f;
+        public float CrouchedCapsuleHeight = 1f;
+
         [Header("Air Movement")]
-        public float MaxAirMoveSpeed = 15f;
+        public float MaxAirMoveSpeed = 10f;
         public float AirAccelerationSpeed = 15f;
         public float Drag = 0.1f;
 
@@ -24,43 +38,64 @@ namespace CallSOS
         public float JumpPreGroundingGraceTime = 0f;
         public float JumpPostGroundingGraceTime = 0f;
 
+        [Header("Sprinting")]
+        public float SprintSpeed = 10f;
+        public float MaxSprintTime = 1.5f;
+        public float DepletedSprintCooldown = 1f;
+
         [Header("Misc")]
         public AdditionalOrientationMethod AdditionalOrientationMethod = AdditionalOrientationMethod.None;
         public float AdditionalOrientationSharpness = 10f;
         public Vector3 Gravity = new Vector3(0, -30f, 0);
         public Transform MeshRoot;
         public Transform cameraFollowPoint;
-        public float CrouchedCapsuleHeight = 1f;
 
-        public CharacterState CurrentCharacterState { get; private set; }
+        public PlayerState CurrentPlayerState { get; private set; }
 
         public KinematicCharacterMotor motor { get {  return Motor; } }
 
         //Private
         private KinematicCharacterMotor Motor;
+        private PlayerSoundController playerSound;
         private CameraControllerLocal cameraController;
         private InteractControllerLocal interactController;
         private InventoryController inventoryController;
+
+
+        private float maxStableMoveSpeed;
         private Camera playerCamera;
         private Collider[] _probedColliders = new Collider[8];
         private RaycastHit[] _probedHits = new RaycastHit[8];
         private Vector3 _moveInputVector;
         private Vector3 _lookInputVector;
+        private Vector3 _footstepVelocity = Vector3.zero;
+        private bool isInitialized = false;
+
+        // Jumping
         private bool _jumpRequested = false;
         private bool _jumpConsumed = false;
         private bool _jumpedThisFrame = false;
         private float _timeSinceJumpRequested = Mathf.Infinity;
         private float _timeSinceLastAbleToJump = 0;
         private Vector3 _internalVelocityAdd = Vector3.zero;
+
+        // Crouching
         private bool _shouldBeCrouching = false;
         private bool _isCrouching = false;
-        private bool isInitialized = false;
+
+        // Sprinting
+        private bool _isStoppedSprinting;
+        private bool _isSprinting;
+        private float _timeSinceStartedSprinting = 0;
+        private float _timeSinceStoppedSprinting = 0;
+        private float _timeSinceSprintExaust = 0;
+
 
         private void Awake()
         {
             Motor = GetComponent<KinematicCharacterMotor>();
 
-            TransitionToState(CharacterState.Default);
+            TransitionToState(PlayerState.Walking);
 
             Motor.CharacterController = this;
         }
@@ -84,6 +119,8 @@ namespace CallSOS
             GameInputPlayer.Instance.OnJumpAction += GameInput_OnJumpAction;
             GameInputPlayer.Instance.OnCrouchAction += GameInput_OnCrouchAction;
             GameInputPlayer.Instance.OnStandAction += GameInput_OnStandAction;
+            GameInputPlayer.Instance.OnSprintStartAction += GameInput_OnSprintStartAction;
+            GameInputPlayer.Instance.OnSprintEndAction += GameInput_OnSprintEndAction;
 
             playerCamera = Camera.main;
             cameraController = playerCamera.GetComponent<CameraControllerLocal>();
@@ -95,12 +132,17 @@ namespace CallSOS
             inventoryController = GetComponent<InventoryController>();
             inventoryController.Init();
 
+            playerSound = GetComponent<PlayerSoundController>();
+            playerSound.Init();
+
             // Tell camera to follow transform
             cameraController.SetFollowTransform(cameraFollowPoint);
 
             // Ignore the character's collider(s) for camera obstruction checks
             cameraController.IgnoredColliders.Clear();
             cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
+
+            maxStableMoveSpeed = WalkingSpeed;
 
             isInitialized = true;
         }
@@ -111,11 +153,15 @@ namespace CallSOS
 
             HandleMovement();
             HandleCharacterInput();
+        }
 
-            if (Input.GetMouseButtonDown(0))
-            {
-                //Cursor.lockState = CursorLockMode.Locked;
-            }
+
+        private void FixedUpdate()
+        {
+            // Calculate footsteps
+            if (!Motor.GroundingStatus.IsStableOnGround) return;
+            int speed = 5;
+            playerSound.ProcessStepCycle(_footstepVelocity, speed);
         }
 
         private void LateUpdate()
@@ -139,7 +185,6 @@ namespace CallSOS
 
         public void HandleMovement()
         {
-
             Vector2 inputVector = GameInputPlayer.Instance.GetMovementVectorNormalized();
             Vector3 moveInputVector = new Vector3(inputVector.x, 0, inputVector.y);
 
@@ -150,9 +195,9 @@ namespace CallSOS
             }
             Quaternion cameraPlanarRotation = Quaternion.LookRotation(cameraPlanarDirection, Motor.CharacterUp);
 
-            switch (CurrentCharacterState)
+            switch (CurrentPlayerState)
             {
-                case CharacterState.Default:
+                case PlayerState.Walking:
 
                     //Move and look
                     _moveInputVector = cameraPlanarRotation * moveInputVector;
@@ -194,25 +239,49 @@ namespace CallSOS
             _jumpRequested = true;
         }
 
+        private void GameInput_OnSprintEndAction(object sender, System.EventArgs e)
+        {
+            maxStableMoveSpeed = WalkingSpeed;
+            _isStoppedSprinting = true;
+            _isSprinting = false;
+            _timeSinceStoppedSprinting = 0;
+        }
+
+        private void GameInput_OnSprintStartAction(object sender, System.EventArgs e)
+        {
+            if (!_isSprinting)
+            {
+                TryStartSprinting();
+            }
+        }
+
+        private void TryStartSprinting()
+        {
+            maxStableMoveSpeed = SprintSpeed;
+            _isStoppedSprinting = false;
+            _timeSinceStartedSprinting = 0f;
+            _timeSinceStoppedSprinting = 0f;
+        }
+
         /// <summary>
         /// Handles movement state transitions and enter/exit callbacks
         /// </summary>
-        public void TransitionToState(CharacterState newState)
+        public void TransitionToState(PlayerState newState)
         {
-            CharacterState tempOldState = CurrentCharacterState;
+            PlayerState tempOldState = CurrentPlayerState;
             OnStateExit(tempOldState, newState);
-            CurrentCharacterState = newState;
+            CurrentPlayerState = newState;
             OnStateEnter(newState, tempOldState);
         }
 
         /// <summary>
         /// Event when entering a state
         /// </summary>
-        public void OnStateEnter(CharacterState toState, CharacterState fromState)
+        public void OnStateEnter(PlayerState toState, PlayerState fromState)
         {
             switch (toState)
             {
-                case CharacterState.Default:
+                case PlayerState.Walking:
                     break;
             }
         }
@@ -220,11 +289,11 @@ namespace CallSOS
         /// <summary>
         /// Event when exiting a state
         /// </summary>
-        public void OnStateExit(CharacterState fromState, CharacterState toState)
+        public void OnStateExit(PlayerState fromState, PlayerState toState)
         {
             switch (fromState)
             {
-                case CharacterState.Default:
+                case PlayerState.Walking:
                     break;
             }
         }
@@ -236,6 +305,21 @@ namespace CallSOS
         /// </summary>
         public void BeforeCharacterUpdate(float deltaTime)
         {
+            switch (CurrentPlayerState)
+            {
+                case PlayerState.Walking:
+                    {
+                        if(_isSprinting)
+                        {
+                            _timeSinceStartedSprinting += deltaTime;
+                            if (_isStoppedSprinting)
+                            {
+                                _timeSinceStoppedSprinting += deltaTime;
+                            }
+                        }
+                        break;
+                    }
+            }
         }
 
 
@@ -246,9 +330,9 @@ namespace CallSOS
         /// </summary>
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
         {
-            switch (CurrentCharacterState)
+            switch (CurrentPlayerState)
             {
-                case CharacterState.Default:
+                case PlayerState.Walking:
                     if (_lookInputVector.sqrMagnitude > 0 && OrientationSharpness > 0f)
                     {
                         // Smoothly interpolate from current to target look direction
@@ -298,9 +382,9 @@ namespace CallSOS
         /// </summary>
         public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
         {
-            switch (CurrentCharacterState)
+            switch (CurrentPlayerState)
             {
-                case CharacterState.Default:
+                case PlayerState.Walking:
                     {
                         // Ground movement
                         if (Motor.GroundingStatus.IsStableOnGround)
@@ -340,10 +424,12 @@ namespace CallSOS
             // Calculate target velocity
             Vector3 inputRight = Vector3.Cross(_moveInputVector, Motor.CharacterUp);
             Vector3 reorientedInput = Vector3.Cross(effectiveGroundNormal, inputRight).normalized * _moveInputVector.magnitude;
-            Vector3 targetMovementVelocity = reorientedInput * MaxStableMoveSpeed;
+            Vector3 targetMovementVelocity = reorientedInput * maxStableMoveSpeed;
 
             // Smooth movement Velocity
             currentVelocity = Vector3.Lerp(currentVelocity, targetMovementVelocity, 1f - Mathf.Exp(-StableMovementSharpness * deltaTime));
+
+            _footstepVelocity = currentVelocity;
         }
 
 
@@ -424,15 +510,17 @@ namespace CallSOS
         }
 
 
+
+
         /// <summary>
         /// (Called by KinematicCharacterMotor during its update cycle)
         /// This is called after the character has finished its movement update
         /// </summary>
         public void AfterCharacterUpdate(float deltaTime)
         {
-            switch (CurrentCharacterState)
+            switch (CurrentPlayerState)
             {
-                case CharacterState.Default:
+                case PlayerState.Walking:
                     {
                         // Handle jump-related values
                         {
@@ -478,6 +566,7 @@ namespace CallSOS
                                         // If no obstructions, uncrouch
                                         MeshRoot.localScale = new Vector3(1f, 1f, 1f);
                                         _isCrouching = false;
+                                        maxStableMoveSpeed = WalkingSpeed;
                                     }
                                 }
                             }
@@ -503,10 +592,12 @@ namespace CallSOS
 
         protected void OnLanded()
         {
+            playerSound.PlayLandingSound();
         }
 
         protected void OnLeaveStableGround()
         {
+            playerSound.PlayJumpSound();
         }
 
         public bool IsColliderValidForCollisions(Collider coll)

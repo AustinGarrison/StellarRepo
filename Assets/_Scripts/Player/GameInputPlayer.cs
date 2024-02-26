@@ -10,6 +10,8 @@ public class GameInputPlayer : MonoBehaviour
     public event EventHandler OnJumpAction;
     public event EventHandler OnCrouchAction;
     public event EventHandler OnStandAction;
+    public event EventHandler OnSprintStartAction;
+    public event EventHandler OnSprintEndAction;
     public event EventHandler OnInteractAction;
     public event EventHandler OnAltInteractAction;
     public event EventHandler OnResourceHUDToggled;
@@ -22,6 +24,7 @@ public class GameInputPlayer : MonoBehaviour
         Move_Right,
         Jump,
         Crouch,
+        Sprint,
     }
 
     private PlayerInputActions playerInputActions;
@@ -39,7 +42,19 @@ public class GameInputPlayer : MonoBehaviour
         playerInputActions.Player.Crouch.performed += Crouch_performed;
         playerInputActions.Player.Crouch.canceled += Crouch_canceled;
         playerInputActions.Player.InventoryToggle.performed += InventoryToggle_performed;
+        playerInputActions.Player.Sprint.performed += Sprint_performed;
+        playerInputActions.Player.Sprint.canceled += Sprint_canceled;
 
+    }
+
+    private void Sprint_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnSprintEndAction?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Sprint_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnSprintStartAction?.Invoke(this, EventArgs.Empty);
     }
 
     private void Jump_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
