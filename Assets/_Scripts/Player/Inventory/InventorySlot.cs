@@ -1,11 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Player.Interaction
+namespace CallSOS.Player.Interaction
 {
 
     public class InventorySlot : MonoBehaviour
@@ -18,7 +15,7 @@ namespace Player.Interaction
 
         // Settings
         [Range(1, 15)] public float fadingMultiplier = 8;
-        public HoldItemHandType slotType;
+        public EquipmentItemHandType slotType;
 
         internal void DisableSlotIcons()
         {

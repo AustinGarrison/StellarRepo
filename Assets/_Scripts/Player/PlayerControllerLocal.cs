@@ -1,6 +1,6 @@
+using CallSOS.Player.Interaction;
+using CallSOS.Player.SFX;
 using KinematicCharacterController;
-using Player.Interaction;
-using System;
 using UnityEngine;
 
 namespace CallSOS.Player
@@ -56,7 +56,7 @@ namespace CallSOS.Player
 
         //Private
         private KinematicCharacterMotor Motor;
-        private PlayerSoundController playerSound;
+        private PlayerSoundManager playerSound;
         private CameraControllerLocal cameraController;
         private InteractControllerLocal interactController;
         private InventoryController inventoryController;
@@ -132,7 +132,7 @@ namespace CallSOS.Player
             inventoryController = GetComponent<InventoryController>();
             inventoryController.Init();
 
-            playerSound = GetComponent<PlayerSoundController>();
+            playerSound = GetComponentInChildren<PlayerSoundManager>();
             playerSound.Init();
 
             // Tell camera to follow transform

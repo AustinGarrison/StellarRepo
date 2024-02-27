@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: BlueSquare
   m_EditorClassIdentifier: 
   itemName: Blue Square
-  prefab: {fileID: 7909434505053490481, guid: f23761f00f90fd8469c395f922e810ff, type: 3}
+  prefab: {fileID: 5378370569933345211, guid: f23761f00f90fd8469c395f922e810ff, type: 3}
   interactText: Pickup

@@ -1,3 +1,4 @@
+using CallSOS.Player.Interaction;
 using UnityEngine;
 
 public enum InteractType
