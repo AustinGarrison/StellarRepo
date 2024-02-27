@@ -5,22 +5,25 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Multiplayer/BootstrapSteamLobby.unity
     guid: ab6a6d98367886a47b3de735daa56731
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Multiplayer/MenuSceneSteam.unity
     guid: ca0bf7943d1109e4cb09942f1b40b029
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Multiplayer/SteamGameScene.unity
     guid: 8ce213b10a0e56749941248c9c9b37dd
-  - enabled: 1
+  - enabled: 0
     path: Assets/Plugins/Loading Screen Studio/Scenes/Demo.unity
     guid: a0c7c2db1dc9801459e5236db993a808
-  - enabled: 1
+  - enabled: 0
     path: Assets/Plugins/Loading Screen Studio/Scenes/Spinners.unity
     guid: e3ddba749f973b148942e390009a0337
-  - enabled: 1
+  - enabled: 0
     path: Assets/Plugins/Loading Screen Studio/Scenes/Test.unity
     guid: 0b52bbbd706aede42abed82b6422f8a7
+  - enabled: 1
+    path: Assets/Scenes/PlayerShip/PlayerShip.unity
+    guid: 3e1e05d23bf9090408f1a5cc59c12144
   m_configObjects: {}

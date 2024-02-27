@@ -1,9 +1,9 @@
-using Printer.Model;
+using CallSOS.Printer.Model;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Printer.UI
+namespace CallSOS.Printer.UI
 {
     public class ShipPrinterViewCategories : MonoBehaviour
     {

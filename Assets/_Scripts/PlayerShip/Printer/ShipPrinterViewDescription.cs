@@ -1,10 +1,9 @@
-using Printer.Model;
-using System.ComponentModel.Design;
+using CallSOS.Printer.Model;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Printer.UI
+namespace CallSOS.Printer.UI
 {
     public class ShipPrinterViewDescription : MonoBehaviour
     {

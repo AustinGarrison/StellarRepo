@@ -17,8 +17,8 @@ public class SerializedChunks : MonoBehaviour, ISerializationCallbackReceiver
     [System.Serializable]
     struct ChunkStruct<TElement>
     {
-        [ReadOnlyRunTime] public int localPosX;
-        [ReadOnlyRunTime] public int localPosY;
+        public int localPosX;
+        public int localPosY;
         public TElement Chunk;
         public ChunkStruct(int posX, int posY, TElement element)
         {

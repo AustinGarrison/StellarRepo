@@ -1,9 +1,8 @@
-using Printer.Model;
-using Printer.UI;
-using System.Collections.Generic;
+using CallSOS.Printer.Model;
+using CallSOS.Printer.UI;
 using UnityEngine;
 
-namespace Printer
+namespace CallSOS.Printer.Controller
 {
     // Handle requests from client
     // Contains Little Code

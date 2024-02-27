@@ -63,6 +63,7 @@ public class InteractControllerLocal : MonoBehaviour
             switch (type)
             {
                 case InteractType.OperationItem:
+
                     OperationItem opItem = item.GetComponentInParent<OperationItem>();
                     
                     if (opItem != null)
@@ -72,6 +73,7 @@ public class InteractControllerLocal : MonoBehaviour
                     
                     interactText.gameObject.SetActive(true);
                     break;
+
                 case InteractType.HoldItem:
                     interactText.text = "[E] " + item.itemScriptable.interactText;
                     interactText.gameObject.SetActive(true);

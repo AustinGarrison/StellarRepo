@@ -10,7 +10,7 @@ public enum InteractType
 public class InteractItem : MonoBehaviour, IInteractItem
 {
 
-    [ReadOnlyRunTime] public ItemSO itemScriptable;
+    public ItemSO itemScriptable;
     [HideInInspector] public InteractType interactType;
 
     public virtual void InteractWith(InteractControllerLocal player) { }

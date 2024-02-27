@@ -11,10 +11,10 @@ public class UniverseManager : MonoBehaviour
     public TextMeshProUGUI currentChunkText;
 
     [Header("Settings")]
-    [ReadOnlyRunTime] public int numberOfChunksXY;
-    [ReadOnlyRunTime] public int numberOfChunksY;
-    [ReadOnlyRunTime] public int numberOfSectorsXY;
-    [ReadOnlyRunTime] public int sectorGuiSize;
+    public int numberOfChunksXY;
+    public int numberOfChunksY;
+    public int numberOfSectorsXY;
+    public int sectorGuiSize;
 
     private void Start()
     {

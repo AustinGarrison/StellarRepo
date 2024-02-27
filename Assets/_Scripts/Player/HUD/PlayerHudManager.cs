@@ -1,51 +1,26 @@
+using Michsky.UI.Heat;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CallSOS.Player.UI
 {
     public class PlayerHudManager : MonoBehaviour
     {
-        [SerializeField] PlayerControllerLocal playerController;
-        public float moveSpeed;
-        public float multiplier;
-        public GameObject helmetHud;
-
-        private Vector3 startPosition = Vector3.zero;
-        private Vector3 targetPosition;
-        private Vector3 moveDirection;
+        [SerializeField] private PlayerControllerLocal playerController;
+        [SerializeField] private ProgressBar staminaBar;
 
         private void Start()
         {
-            startPosition = transform.position;
+            staminaBar.currentValue = 100f;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
-            MoveHelmetHudImage();
-        }
+            float sprintTimer = playerController._timeSinceSprintStarted / playerController.MaxSprintDuration;
+            float remainingSprint = Mathf.Lerp(100f, 0f, sprintTimer);
 
-        private void MoveHelmetHudImage()
-        {
-            Vector2 look = GameInputPlayer.Instance.GetLookVector();
-
-            look.x = Mathf.Clamp(look.x, -1f, 1f);
-            look.y = Mathf.Clamp(look.y, -1f, 1f);
-
-            moveDirection.z = look.x;
-            moveDirection.y = look.y;
-
-            moveDirection /= multiplier;
-
-            if (moveDirection == Vector3.zero)
-            {
-                targetPosition = startPosition;
-            }
-
-            moveDirection.y *= -1;
-
-            targetPosition = startPosition + moveDirection;
-
-            // Use Vector3.Lerp to smoothly interpolate between current position and target position.
-            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * moveSpeed);
+            staminaBar.SetValue(remainingSprint);
         }
     }
 }

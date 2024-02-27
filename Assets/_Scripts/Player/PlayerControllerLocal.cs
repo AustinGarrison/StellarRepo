@@ -40,8 +40,8 @@ namespace CallSOS.Player
 
         [Header("Sprinting")]
         public float SprintSpeed = 10f;
-        public float MaxSprintTime = 1.5f;
-        public float DepletedSprintCooldown = 1f;
+        public float MaxSprintDuration = 1.5f;
+        public float ExhaustedCooldown = 1f;
 
         [Header("Misc")]
         public AdditionalOrientationMethod AdditionalOrientationMethod = AdditionalOrientationMethod.None;
@@ -62,13 +62,13 @@ namespace CallSOS.Player
         private InventoryController inventoryController;
 
 
-        private float maxStableMoveSpeed;
+        private float currentMoveSpeed;
         private Camera playerCamera;
         private Collider[] _probedColliders = new Collider[8];
         private RaycastHit[] _probedHits = new RaycastHit[8];
         private Vector3 _moveInputVector;
         private Vector3 _lookInputVector;
-        private Vector3 _footstepVelocity = Vector3.zero;
+        private Vector3 _footstepRate = Vector3.zero;
         private bool isInitialized = false;
 
         // Jumping
@@ -84,11 +84,11 @@ namespace CallSOS.Player
         private bool _isCrouching = false;
 
         // Sprinting
-        private bool _isStoppedSprinting;
-        private bool _isSprinting;
-        private float _timeSinceStartedSprinting = 0;
-        private float _timeSinceStoppedSprinting = 0;
-        private float _timeSinceSprintExaust = 0;
+        private bool _shouldBeSprinting = false;
+        private bool _isSprinting = false;
+        internal float _timeSinceSprintStarted = 0f;
+        private float _timeSinceSprintEnded = 0f;
+
 
 
         private void Awake()
@@ -142,8 +142,6 @@ namespace CallSOS.Player
             cameraController.IgnoredColliders.Clear();
             cameraController.IgnoredColliders.AddRange(GetComponentsInChildren<Collider>());
 
-            maxStableMoveSpeed = WalkingSpeed;
-
             isInitialized = true;
         }
 
@@ -158,10 +156,9 @@ namespace CallSOS.Player
 
         private void FixedUpdate()
         {
-            // Calculate footsteps
+            // Calculate footsteps, _foodstepRate updated in UpdateGroundVelocity()
             if (!Motor.GroundingStatus.IsStableOnGround) return;
-            int speed = 5;
-            playerSound.ProcessStepCycle(_footstepVelocity, speed);
+            playerSound.ProcessStepCycle(_footstepRate, CurrentPlayerState);
         }
 
         private void LateUpdate()
@@ -212,6 +209,37 @@ namespace CallSOS.Player
                             break;
                     }
                     break;
+                case PlayerState.Sprinting:
+
+                    //Move and look
+                    _moveInputVector = cameraPlanarRotation * moveInputVector;
+
+                    switch (OrientationMethod)
+                    {
+                        case OrientationMethod.TowardsCamera:
+                            _lookInputVector = cameraPlanarDirection;
+                            break;
+                        case OrientationMethod.TowardsMovement:
+                            _lookInputVector = _moveInputVector.normalized;
+                            break;
+                    }
+                    break;
+                case PlayerState.Crouching:
+
+                    //Move and look
+                    _moveInputVector = cameraPlanarRotation * moveInputVector;
+
+                    switch (OrientationMethod)
+                    {
+                        case OrientationMethod.TowardsCamera:
+                            _lookInputVector = cameraPlanarDirection;
+                            break;
+                        case OrientationMethod.TowardsMovement:
+                            _lookInputVector = _moveInputVector.normalized;
+                            break;
+                    }
+                    break;
+
             }
 
         }
@@ -223,6 +251,7 @@ namespace CallSOS.Player
             if (!_isCrouching)
             {
                 _isCrouching = true;
+                TransitionToState(PlayerState.Crouching);
                 Motor.SetCapsuleDimensions(0.5f, CrouchedCapsuleHeight, CrouchedCapsuleHeight * 0.5f);
                 MeshRoot.localScale = new Vector3(1f, 0.5f, 1f);
             }
@@ -230,7 +259,8 @@ namespace CallSOS.Player
 
         private void GameInput_OnStandAction(object sender, System.EventArgs e)
         {
-            _shouldBeCrouching = false;
+            if(_isCrouching)
+                _shouldBeCrouching = false;
         }
 
         private void GameInput_OnJumpAction(object sender, System.EventArgs e)
@@ -238,29 +268,26 @@ namespace CallSOS.Player
             _timeSinceJumpRequested = 0;
             _jumpRequested = true;
         }
-
-        private void GameInput_OnSprintEndAction(object sender, System.EventArgs e)
-        {
-            maxStableMoveSpeed = WalkingSpeed;
-            _isStoppedSprinting = true;
-            _isSprinting = false;
-            _timeSinceStoppedSprinting = 0;
-        }
-
         private void GameInput_OnSprintStartAction(object sender, System.EventArgs e)
         {
+            _shouldBeSprinting = true;
+
             if (!_isSprinting)
             {
-                TryStartSprinting();
+                _isSprinting = true;
+                TransitionToState(PlayerState.Sprinting);
             }
         }
 
-        private void TryStartSprinting()
+        private void GameInput_OnSprintEndAction(object sender, System.EventArgs e)
         {
-            maxStableMoveSpeed = SprintSpeed;
-            _isStoppedSprinting = false;
-            _timeSinceStartedSprinting = 0f;
-            _timeSinceStoppedSprinting = 0f;
+            if (_isSprinting)
+            {
+                _shouldBeSprinting = false;
+                _isSprinting = false;
+                TransitionToState(PlayerState.Walking);
+            }
+                
         }
 
         /// <summary>
@@ -282,6 +309,13 @@ namespace CallSOS.Player
             switch (toState)
             {
                 case PlayerState.Walking:
+                    currentMoveSpeed = WalkingSpeed;
+                    break;
+                case PlayerState.Sprinting:
+                    currentMoveSpeed = SprintSpeed;
+                    break;
+                case PlayerState.Crouching:
+                    currentMoveSpeed = CrouchingSpeed;
                     break;
             }
         }
@@ -295,6 +329,12 @@ namespace CallSOS.Player
             {
                 case PlayerState.Walking:
                     break;
+                case PlayerState.Sprinting:
+                    _isSprinting = false;
+                    break;
+                case PlayerState.Crouching:
+                    _isCrouching = false;
+                    break;
             }
         }
 
@@ -307,21 +347,23 @@ namespace CallSOS.Player
         {
             switch (CurrentPlayerState)
             {
+                // Sould Track how long since stopped sprinting
                 case PlayerState.Walking:
-                    {
-                        if(_isSprinting)
-                        {
-                            _timeSinceStartedSprinting += deltaTime;
-                            if (_isStoppedSprinting)
-                            {
-                                _timeSinceStoppedSprinting += deltaTime;
-                            }
-                        }
-                        break;
-                    }
+
+                    break;
+
+                // Sould Track how long since started sprinting
+                case PlayerState.Sprinting:
+
+                    break;
+
+                // Sould Track how long since stopped sprinting
+                case PlayerState.Crouching:
+
+                    break;
+
             }
         }
-
 
         /// <summary>
         /// (Called by KinematicCharacterMotor during its update cycle)
@@ -333,47 +375,62 @@ namespace CallSOS.Player
             switch (CurrentPlayerState)
             {
                 case PlayerState.Walking:
-                    if (_lookInputVector.sqrMagnitude > 0 && OrientationSharpness > 0f)
-                    {
-                        // Smoothly interpolate from current to target look direction
-                        Vector3 smoothedLookDirection = Vector3.Slerp(Motor.CharacterForward, _lookInputVector, 1 - Mathf.Exp(-OrientationSharpness * deltaTime)).normalized;
-                        currentRotation = Quaternion.LookRotation(smoothedLookDirection, Motor.CharacterUp);
-                    }
-
-                    Vector3 currentUp = (currentRotation * Vector3.up);
-                    if (AdditionalOrientationMethod == AdditionalOrientationMethod.TowardsGravity)
-                    {
-                        // Rotate from current up to invert gravity
-                        Vector3 smoothedGravityDir = Vector3.Slerp(currentUp, -Gravity.normalized, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
-                        currentRotation = Quaternion.FromToRotation(currentUp, smoothedGravityDir) * currentRotation;
-                    }
-                    else if (AdditionalOrientationMethod == AdditionalOrientationMethod.TowardsGroundSlopeAndGravity)
-                    {
-                        if (Motor.GroundingStatus.IsStableOnGround)
-                        {
-                            Vector3 initialCharacterBottomHemiCenter = Motor.TransientPosition + (currentUp * Motor.Capsule.radius);
-                            Vector3 smoothedGroundNormal = Vector3.Slerp(Motor.CharacterUp, Motor.GroundingStatus.GroundNormal, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
-                            currentRotation = Quaternion.FromToRotation(currentUp, smoothedGroundNormal) * currentRotation;
-
-                            // Move the position to create a rotation around the bottom hemi center instead of around the pivot
-                            Motor.SetTransientPosition(initialCharacterBottomHemiCenter + (currentRotation * Vector3.down * Motor.Capsule.radius));
-
-                        }
-                        else
-                        {
-                            Vector3 smoothedGravityDir = Vector3.Slerp(currentUp, -Gravity.normalized, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
-                            currentRotation = Quaternion.FromToRotation(currentUp, smoothedGravityDir) * currentRotation;
-                        }
-                    }
-                    else
-                    {
-                        Vector3 smoothedGravityDir = Vector3.Slerp(currentUp, Vector3.up, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
-                        currentRotation = Quaternion.FromToRotation(currentUp, smoothedGravityDir) * currentRotation;
-                    }
+                    DefaultRotation(ref currentRotation, deltaTime);
+                    break;
+                case PlayerState.Sprinting:
+                    DefaultRotation(ref currentRotation, deltaTime);
+                    break;
+                case PlayerState.Crouching:
+                    DefaultRotation(ref currentRotation, deltaTime);
                     break;
             }
         }
 
+
+        /// <summary>
+        /// (Called by UpdateRotation)
+        /// Used by Walking, Crouching and Sprinting PlayerStates
+        /// </summary>
+        private void DefaultRotation(ref Quaternion currentRotation, float deltaTime)
+        {
+            if (_lookInputVector.sqrMagnitude > 0 && OrientationSharpness > 0f)
+            {
+                // Smoothly interpolate from current to target look direction
+                Vector3 smoothedLookDirection = Vector3.Slerp(Motor.CharacterForward, _lookInputVector, 1 - Mathf.Exp(-OrientationSharpness * deltaTime)).normalized;
+                currentRotation = Quaternion.LookRotation(smoothedLookDirection, Motor.CharacterUp);
+            }
+
+            Vector3 currentUp = (currentRotation * Vector3.up);
+            if (AdditionalOrientationMethod == AdditionalOrientationMethod.TowardsGravity)
+            {
+                // Rotate from current up to invert gravity
+                Vector3 smoothedGravityDir = Vector3.Slerp(currentUp, -Gravity.normalized, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
+                currentRotation = Quaternion.FromToRotation(currentUp, smoothedGravityDir) * currentRotation;
+            }
+            else if (AdditionalOrientationMethod == AdditionalOrientationMethod.TowardsGroundSlopeAndGravity)
+            {
+                if (Motor.GroundingStatus.IsStableOnGround)
+                {
+                    Vector3 initialCharacterBottomHemiCenter = Motor.TransientPosition + (currentUp * Motor.Capsule.radius);
+                    Vector3 smoothedGroundNormal = Vector3.Slerp(Motor.CharacterUp, Motor.GroundingStatus.GroundNormal, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
+                    currentRotation = Quaternion.FromToRotation(currentUp, smoothedGroundNormal) * currentRotation;
+
+                    // Move the position to create a rotation around the bottom hemi center instead of around the pivot
+                    Motor.SetTransientPosition(initialCharacterBottomHemiCenter + (currentRotation * Vector3.down * Motor.Capsule.radius));
+
+                }
+                else
+                {
+                    Vector3 smoothedGravityDir = Vector3.Slerp(currentUp, -Gravity.normalized, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
+                    currentRotation = Quaternion.FromToRotation(currentUp, smoothedGravityDir) * currentRotation;
+                }
+            }
+            else
+            {
+                Vector3 smoothedGravityDir = Vector3.Slerp(currentUp, Vector3.up, 1 - Mathf.Exp(-AdditionalOrientationSharpness * deltaTime));
+                currentRotation = Quaternion.FromToRotation(currentUp, smoothedGravityDir) * currentRotation;
+            }
+        }
 
         /// <summary>
         /// (Called by KinematicCharacterMotor during its update cycle)
@@ -385,29 +442,65 @@ namespace CallSOS.Player
             switch (CurrentPlayerState)
             {
                 case PlayerState.Walking:
+
+                    DefaultVelocity(ref currentVelocity, deltaTime);
+                    break;
+
+                case PlayerState.Sprinting:
+
+                    DefaultVelocity(ref currentVelocity, deltaTime);
+                    break;
+
+                // Same as default, but doesnt allow jumping
+                case PlayerState.Crouching:
+
+                    // Ground movement
+                    if (Motor.GroundingStatus.IsStableOnGround)
                     {
-                        // Ground movement
-                        if (Motor.GroundingStatus.IsStableOnGround)
-                        {
-                            UpdateGroundVelocity(ref currentVelocity, deltaTime);
-                        }
-                        // Air movement
-                        else
-                        {
-                            UpdateAirVelocity(ref currentVelocity, deltaTime);
-                        }
-
-                        // Handle jumping
-                        UpdateJumpingVelocity(ref currentVelocity, deltaTime);
-
-                        // Take into account additive velocity
-                        if (_internalVelocityAdd.sqrMagnitude > 0f)
-                        {
-                            currentVelocity += _internalVelocityAdd;
-                            _internalVelocityAdd = Vector3.zero;
-                        }
-                        break;
+                        UpdateGroundVelocity(ref currentVelocity, deltaTime);
                     }
+                    // Air movement
+                    else
+                    {
+                        UpdateAirVelocity(ref currentVelocity, deltaTime);
+                    }
+
+                    // Take into account additive velocity
+                    if (_internalVelocityAdd.sqrMagnitude > 0f)
+                    {
+                        currentVelocity += _internalVelocityAdd;
+                        _internalVelocityAdd = Vector3.zero;
+                    }
+                    break;
+
+            }
+        }
+
+        /// <summary>
+        /// (Called by UpdateVelocity)
+        /// Default Velocity used by Sprinting and Walking
+        /// </summary>
+        private void DefaultVelocity(ref Vector3 currentVelocity, float deltaTime)
+        {                    
+            // Ground movement
+            if (Motor.GroundingStatus.IsStableOnGround)
+            {
+                UpdateGroundVelocity(ref currentVelocity, deltaTime);
+            }
+            // Air movement
+            else
+            {
+                UpdateAirVelocity(ref currentVelocity, deltaTime);
+            }
+
+            // Handle jumping
+            UpdateJumpingVelocity(ref currentVelocity, deltaTime);
+
+            // Take into account additive velocity
+            if (_internalVelocityAdd.sqrMagnitude > 0f)
+            {
+                currentVelocity += _internalVelocityAdd;
+                _internalVelocityAdd = Vector3.zero;
             }
         }
 
@@ -424,14 +517,13 @@ namespace CallSOS.Player
             // Calculate target velocity
             Vector3 inputRight = Vector3.Cross(_moveInputVector, Motor.CharacterUp);
             Vector3 reorientedInput = Vector3.Cross(effectiveGroundNormal, inputRight).normalized * _moveInputVector.magnitude;
-            Vector3 targetMovementVelocity = reorientedInput * maxStableMoveSpeed;
+            Vector3 targetMovementVelocity = reorientedInput * currentMoveSpeed;
 
             // Smooth movement Velocity
             currentVelocity = Vector3.Lerp(currentVelocity, targetMovementVelocity, 1f - Mathf.Exp(-StableMovementSharpness * deltaTime));
 
-            _footstepVelocity = currentVelocity;
+            _footstepRate = currentVelocity;
         }
-
 
         private void UpdateAirVelocity(ref Vector3 currentVelocity, float deltaTime)
         {
@@ -483,6 +575,7 @@ namespace CallSOS.Player
         {
             _jumpedThisFrame = false;
             _timeSinceJumpRequested += deltaTime;
+
             if (_jumpRequested)
             {
                 // See if we actually are allowed to jump
@@ -508,10 +601,7 @@ namespace CallSOS.Player
                 }
             }
         }
-
-
-
-
+        
         /// <summary>
         /// (Called by KinematicCharacterMotor during its update cycle)
         /// This is called after the character has finished its movement update
@@ -521,62 +611,98 @@ namespace CallSOS.Player
             switch (CurrentPlayerState)
             {
                 case PlayerState.Walking:
+                    
+                    // Handle jump-related 
+                    // Handle jumping pre-ground grace period
+                    if (_jumpRequested && _timeSinceJumpRequested > JumpPreGroundingGraceTime)
                     {
-                        // Handle jump-related values
-                        {
-                            // Handle jumping pre-ground grace period
-                            if (_jumpRequested && _timeSinceJumpRequested > JumpPreGroundingGraceTime)
-                            {
-                                _jumpRequested = false;
-                            }
-
-                            if (Motor.GroundingStatus.IsStableOnGround)
-                            {
-                                // If we're on a ground surface, reset jumping values
-                                if (!_jumpedThisFrame)
-                                {
-                                    _jumpConsumed = false;
-                                }
-                                _timeSinceLastAbleToJump = 0f;
-                            }
-                            else
-                            {
-                                // Keep track of time since we were last able to jump (for grace period)
-                                _timeSinceLastAbleToJump += deltaTime;
-                            }
-
-                            // Handle Uncrouching
-                            {
-                                if (_isCrouching && !_shouldBeCrouching)
-                                {
-                                    // Do an overlap test with the character's standing height to see if there are any obstructions
-                                    Motor.SetCapsuleDimensions(0.5f, 2f, 1f);
-                                    if (Motor.CharacterOverlap(
-                                        Motor.TransientPosition,
-                                        Motor.TransientRotation,
-                                        _probedColliders,
-                                        Motor.CollidableLayers,
-                                        QueryTriggerInteraction.Ignore) > 0)
-                                    {
-                                        // If obstructions, just stick to crouching dimensions
-                                        Motor.SetCapsuleDimensions(0.5f, CrouchedCapsuleHeight, CrouchedCapsuleHeight * 0.5f);
-                                    }
-                                    else
-                                    {
-                                        // If no obstructions, uncrouch
-                                        MeshRoot.localScale = new Vector3(1f, 1f, 1f);
-                                        _isCrouching = false;
-                                        maxStableMoveSpeed = WalkingSpeed;
-                                    }
-                                }
-                            }
-                        }
-
-                        break;
+                        _jumpRequested = false;
                     }
+
+                    if (Motor.GroundingStatus.IsStableOnGround)
+                    {
+                        // If we're on a ground surface, reset jumping values
+                        if (!_jumpedThisFrame)
+                        {
+                            _jumpConsumed = false;
+                        }
+                        _timeSinceLastAbleToJump = 0f;
+                    }
+                    else
+                    {
+                        // Keep track of time since we were last able to jump (for grace period)
+                        _timeSinceLastAbleToJump += deltaTime;
+                    }
+                    break;
+                case PlayerState.Sprinting:
+                    // Handle jump-related 
+                    // Handle jumping pre-ground grace period
+                    if (_jumpRequested && _timeSinceJumpRequested > JumpPreGroundingGraceTime)
+                    {
+                        _jumpRequested = false;
+                    }
+
+                    if (Motor.GroundingStatus.IsStableOnGround)
+                    {
+                        // If we're on a ground surface, reset jumping values
+                        if (!_jumpedThisFrame)
+                        {
+                            _jumpConsumed = false;
+                        }
+                        _timeSinceLastAbleToJump = 0f;
+                    }
+                    else
+                    {
+                        // Keep track of time since we were last able to jump (for grace period)
+                        _timeSinceLastAbleToJump += deltaTime;
+                    }
+
+                    _timeSinceSprintStarted += Time.deltaTime;
+                    
+                    if(_timeSinceSprintStarted > MaxSprintDuration)
+                    {
+                        _shouldBeSprinting = false;
+                        _isSprinting = false;
+                        TransitionToState(PlayerState.Walking);
+                    }
+
+                    break;
+                case PlayerState.Crouching:
+
+                    // Cancel crouch if jump was requested. Dont jump though
+                    if (_jumpRequested)
+                    {
+                        _jumpRequested = false;
+                        _shouldBeCrouching = false;
+                    }
+
+                    // Handle Uncrouching
+                    if (_isCrouching && !_shouldBeCrouching)
+                    {
+                        // Do an overlap test with the character's standing height to see if there are any obstructions
+                        Motor.SetCapsuleDimensions(0.5f, 2f, 1f);
+                        if (Motor.CharacterOverlap(
+                            Motor.TransientPosition,
+                            Motor.TransientRotation,
+                            _probedColliders,
+                            Motor.CollidableLayers,
+                            QueryTriggerInteraction.Ignore) > 0)
+                        {
+                            // If obstructions, just stick to crouching dimensions
+                            Motor.SetCapsuleDimensions(0.5f, CrouchedCapsuleHeight, CrouchedCapsuleHeight * 0.5f);
+                        }
+                        else
+                        {
+                            // If no obstructions, uncrouch
+                            MeshRoot.localScale = new Vector3(1f, 1f, 1f);
+                            _isCrouching = false;
+                            TransitionToState(PlayerState.Walking);
+                        }
+                    }
+                    
+                    break;
             }
         }
-
 
         public void PostGroundingUpdate(float deltaTime)
         {

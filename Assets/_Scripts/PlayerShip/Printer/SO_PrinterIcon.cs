@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Printer.Model
+namespace CallSOS.Printer.Model
 {
     [CreateAssetMenu(fileName = "PrinterCategory", menuName = "ScriptableObject/PlayerShip/3DPrinter/PrinterCategory")]
     public class SO_PrinterIcon : ScriptableObject

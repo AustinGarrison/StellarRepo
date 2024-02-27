@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Printer.Model
+namespace CallSOS.Printer.Model
 {
     // Handles all data logic
     // Interact with database

@@ -1,11 +1,10 @@
 using System;
 using TMPro;
-using Unity.VisualScripting.ReorderableList;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Printer.UI
+namespace CallSOS.Printer.UI
 {
     public class ShipPrinterIcon : MonoBehaviour, IPointerClickHandler
     {
