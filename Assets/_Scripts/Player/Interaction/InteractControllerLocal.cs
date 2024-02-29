@@ -7,17 +7,19 @@ namespace CallSOS.Player.Interaction
 {
     public class InteractControllerLocal : MonoBehaviour
     {
-        [SerializeField] private InventoryController inventoryController;
-        [SerializeField] private TextMeshProUGUI interactText;
+        //[SerializeField] private InventoryController inventoryController;
         [SerializeField] private float pickupRange = 4f;
         [SerializeField] private LayerMask interactLayer;
 
         private Transform _cameraTransform;
         private bool isInitialized;
+        public bool pickupItem = false;
 
+        #region Events
         // Events
         public event EventHandler<EquipmentItemEventArgs> OnEquipmentItemInteract;
-        public event EventHandler<ResourceItemEventArgs> OnResourceItemInteract;
+        public event EventHandler<ResourceItemEventArgs> OnResourceItemInteract; 
+        public event EventHandler<ChangeTextEvent> OnInteractTextEvent;
 
         public class EquipmentItemEventArgs : EventArgs
         {
@@ -39,10 +41,16 @@ namespace CallSOS.Player.Interaction
             }
         }
 
-        private void Awake()
+        public class ChangeTextEvent : EventArgs
         {
-            interactText.gameObject.SetActive(false);
+            public string Message { get; }
+
+            public ChangeTextEvent(string message)
+            {
+                Message = message;
+            }
         }
+        #endregion
 
         internal void Init()
         {
@@ -51,74 +59,113 @@ namespace CallSOS.Player.Interaction
             isInitialized = true;
         }
 
-        private void Update()
+        private void OnDisable()
         {
-            if (!isInitialized) return;
-
-            if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit hit, pickupRange, interactLayer))
-            {
-                InteractItem item = hit.transform.gameObject.GetComponent<InteractItem>();
-                Debug.Log(hit.transform.gameObject.name);
-                InteractType type = item.interactType;
-
-                switch (type)
-                {
-                    case InteractType.OperationItem:
-
-                        OperationItem opItem = item.GetComponentInParent<OperationItem>();
-
-                        if (opItem != null)
-                            interactText.text = "[E] " + opItem.interactText;
-                        else
-                            interactText.text = "[E] " + "Interact";
-
-                        interactText.gameObject.SetActive(true);
-                        break;
-
-                    case InteractType.HoldItem:
-                        interactText.text = "[E] " + item.itemScriptable.interactText;
-                        interactText.gameObject.SetActive(true);
-                        break;
-                    case InteractType.InventoryItem:
-                        interactText.text = "[E] " + item.itemScriptable.interactText;
-                        interactText.gameObject.SetActive(true);
-                        break;
-                }
-            }
-            else
-            {
-                interactText.gameObject.SetActive(false);
-            }
+            GameInputPlayer.Instance.OnInteractAction -= GameInput_OnInteractAction;
         }
 
         private void GameInput_OnInteractAction(object sender, EventArgs e)
         {
-            if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit hit, pickupRange, interactLayer))
-            {
-                InteractType type = hit.transform.gameObject.GetComponent<InteractItem>().interactType;
+            pickupItem = true;
+        }
 
-                switch (type)
+        private void Update()
+        {
+            if (!isInitialized) return;
+
+            FindInteractItem();
+        }
+
+        InteractItem interactItemHolder = null;
+
+        private void FindInteractItem()
+        {
+            if (Physics.Raycast(_cameraTransform.transform.position, _cameraTransform.transform.forward, out RaycastHit rayHit, pickupRange, interactLayer))
+            {
+                InteractItem interactItem = rayHit.transform.gameObject.GetComponent<InteractItem>();
+
+                if (interactItem != interactItemHolder)
                 {
-                    case InteractType.OperationItem:
-                        InteractWithOperationItem(hit);
-                        break;
-                    case InteractType.HoldItem:
-                        InteractWithHoldItem(hit);
-                        break;
-                    case InteractType.InventoryItem:
-                        InteractWithInventoryItem(hit);
-                        break;
-                    default:
-                        Debug.LogError("No interaction type found in Hit");
-                        break;
+                    interactItemHolder = interactItem;
+                    SetPickupText(interactItem);
+                }
+
+                if (pickupItem == true)
+                    PickupItem(interactItem);
+            }
+            else
+            {
+                if (interactItemHolder != null)
+                {
+                    interactItemHolder = null;
+                    SetPickupText(null);
                 }
             }
         }
 
-        private void InteractWithOperationItem(RaycastHit hit)
+        private void SetPickupText(InteractItem interactItem)
+        {
+            if(interactItem == null)
+            {
+                OnInteractTextEvent?.Invoke(this, new ChangeTextEvent(null));
+                return;
+            }
+
+            string itemInteractTypeText = "";
+            InteractType interactType = interactItem.interactType;
+
+            switch (interactType)
+            {
+                case InteractType.OperationItem:
+
+                    OperationItem operationItem = interactItem.GetComponentInParent<OperationItem>();
+
+                    if (operationItem != null)
+                        itemInteractTypeText = operationItem.interactText;
+                    else
+                        itemInteractTypeText = "Interact";
+                    break;
+
+                case InteractType.HoldItem:
+                    itemInteractTypeText = interactItem.itemScriptable.interactText;
+                    break;
+
+                case InteractType.InventoryItem:
+                    itemInteractTypeText = interactItem.itemScriptable.interactText;
+                    break;
+
+            }
+
+            OnInteractTextEvent?.Invoke(this, new ChangeTextEvent(itemInteractTypeText));            
+        }
+
+        private void PickupItem(InteractItem interactItem)
+        {
+            pickupItem = false;
+
+            InteractType type = interactItem.interactType;
+
+            switch (type)
+            {
+                case InteractType.OperationItem:
+                    InteractWithOperationItem(interactItem);
+                    break;
+                case InteractType.HoldItem:
+                    InteractWithHoldItem(interactItem);
+                    break;
+                case InteractType.InventoryItem:
+                    InteractWithInventoryItem(interactItem);
+                    break;
+                default:
+                    Debug.LogError("No interaction type found in Hit");
+                    break;
+            }
+        }
+
+        private void InteractWithOperationItem(InteractItem interactItem)
         {
             //hit.transform.GetComponent<OperationItem>().InteractWith();
-            IInteractItem operation = hit.transform.GetComponent<IInteractItem>();
+            IInteractItem operation = interactItem.GetComponent<IInteractItem>();
 
             if (operation != null)
             {
@@ -126,9 +173,9 @@ namespace CallSOS.Player.Interaction
             }
         }
 
-        private void InteractWithHoldItem(RaycastHit hit)
+        private void InteractWithHoldItem(InteractItem interactItem)
         {
-            EquipmentItem equipmentItem = hit.transform.GetComponent<EquipmentItem>();
+            EquipmentItem equipmentItem = interactItem.GetComponent<EquipmentItem>();
 
             if (equipmentItem != null)
             {
@@ -142,11 +189,11 @@ namespace CallSOS.Player.Interaction
             }
         }
 
-        private void InteractWithInventoryItem(RaycastHit hit)
+        private void InteractWithInventoryItem(InteractItem interactItem)
         {
             //if (hit.transform.GetComponent<InventoryItem>() == null)
             //    return;
-            ResourceItem inventoryItem = hit.transform.GetComponent<ResourceItem>();
+            ResourceItem inventoryItem = interactItem.GetComponent<ResourceItem>();
 
             if (inventoryItem != null)
             {
@@ -154,7 +201,7 @@ namespace CallSOS.Player.Interaction
                 OnResourceItemInteract?.Invoke(this, new ResourceItemEventArgs(inventoryItem));
 
                 // Despawn Object
-                Destroy(hit.transform.gameObject);
+                Destroy(interactItem.transform.gameObject);
             }
         }
     }

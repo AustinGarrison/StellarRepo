@@ -4,7 +4,6 @@ namespace CallSOS.Player.Interaction.Equipment
 {
     public class PlasmaCutter : EquipmentActions
     {
-
         public override void EquipmentMainAbility()
         {
             Debug.Log("Plasma Cutter cutting");

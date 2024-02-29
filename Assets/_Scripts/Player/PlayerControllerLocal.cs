@@ -1,6 +1,7 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.SFX;
 using KinematicCharacterController;
+using Michsky.UI.Heat;
 using UnityEngine;
 
 namespace CallSOS.Player
@@ -14,7 +15,6 @@ namespace CallSOS.Player
 
     public class PlayerControllerLocal : MonoBehaviour, ICharacterController
     {
-
         [Header("Stable Movement")]
         public float StableMovementSharpness = 15f;
         public float OrientationSharpness = 10f;
@@ -60,6 +60,7 @@ namespace CallSOS.Player
         private CameraControllerLocal cameraController;
         private InteractControllerLocal interactController;
         private InventoryController inventoryController;
+        [SerializeField] private PauseMenuManager pauseMenuManager;
 
 
         private float currentMoveSpeed;
@@ -70,6 +71,7 @@ namespace CallSOS.Player
         private Vector3 _lookInputVector;
         private Vector3 _footstepRate = Vector3.zero;
         private bool isInitialized = false;
+        private bool isPaused = false;
 
         // Jumping
         private bool _jumpRequested = false;
@@ -108,12 +110,6 @@ namespace CallSOS.Player
             return;
         }
 
-        public void DebugInit()
-        {
-            Init();
-            Motor.enabled = true;
-        }
-
         internal void Init()
         {
             GameInputPlayer.Instance.OnJumpAction += GameInput_OnJumpAction;
@@ -121,6 +117,8 @@ namespace CallSOS.Player
             GameInputPlayer.Instance.OnStandAction += GameInput_OnStandAction;
             GameInputPlayer.Instance.OnSprintStartAction += GameInput_OnSprintStartAction;
             GameInputPlayer.Instance.OnSprintEndAction += GameInput_OnSprintEndAction;
+
+            pauseMenuManager.OnPauseToggle += PauseMenuManager_OnPauseToggle;
 
             playerCamera = Camera.main;
             cameraController = playerCamera.GetComponent<CameraControllerLocal>();
@@ -133,7 +131,7 @@ namespace CallSOS.Player
             inventoryController.Init();
 
             playerSound = GetComponentInChildren<PlayerSoundManager>();
-            playerSound.Init();
+            if(playerSound != null) playerSound.Init();
 
             // Tell camera to follow transform
             cameraController.SetFollowTransform(cameraFollowPoint);
@@ -145,20 +143,81 @@ namespace CallSOS.Player
             isInitialized = true;
         }
 
+        #region Events
+
+        private void GameInput_OnCrouchAction(object sender, System.EventArgs e)
+        {
+            _shouldBeCrouching = true;
+
+            if (!_isCrouching)
+            {
+                _isCrouching = true;
+                TransitionToState(PlayerState.Crouching);
+                Motor.SetCapsuleDimensions(0.5f, CrouchedCapsuleHeight, CrouchedCapsuleHeight * 0.5f);
+                MeshRoot.localScale = new Vector3(1f, 0.5f, 1f);
+            }
+        }
+
+        private void GameInput_OnStandAction(object sender, System.EventArgs e)
+        {
+            if (_isCrouching)
+                _shouldBeCrouching = false;
+        }
+
+        private void GameInput_OnJumpAction(object sender, System.EventArgs e)
+        {
+            _timeSinceJumpRequested = 0;
+            _jumpRequested = true;
+        }
+        private void GameInput_OnSprintStartAction(object sender, System.EventArgs e)
+        {
+            _shouldBeSprinting = true;
+
+            if (!_isSprinting)
+            {
+                _isSprinting = true;
+                TransitionToState(PlayerState.Sprinting);
+            }
+        }
+
+        private void GameInput_OnSprintEndAction(object sender, System.EventArgs e)
+        {
+            if (_isSprinting)
+            {
+                _shouldBeSprinting = false;
+                _isSprinting = false;
+                TransitionToState(PlayerState.Walking);
+            }
+
+        }
+
+        private void PauseMenuManager_OnPauseToggle(object sender, System.EventArgs e)
+        {
+            isPaused = !isPaused;
+        }
+
+        #endregion
+
+
         private void Update()
         {
             if (!isInitialized) return;
+            if (isPaused)
+            {
+                _moveInputVector = Vector3.zero;
+                return;
+            }
 
             HandleMovement();
-            HandleCharacterInput();
+            GetCameraInput();
         }
 
 
         private void FixedUpdate()
         {
             // Calculate footsteps, _foodstepRate updated in UpdateGroundVelocity()
-            if (!Motor.GroundingStatus.IsStableOnGround) return;
-            playerSound.ProcessStepCycle(_footstepRate, CurrentPlayerState);
+            if (Motor.GroundingStatus.IsStableOnGround && playerSound != null)
+                playerSound.ProcessStepCycle(_footstepRate, CurrentPlayerState);
         }
 
         private void LateUpdate()
@@ -173,12 +232,7 @@ namespace CallSOS.Player
         }
 
 
-        private void HandleCharacterInput()
-        {
-            PlayerInputs playerInputs = new PlayerInputs();
 
-            playerInputs.CameraRotation = cameraController.Transform.rotation;
-        }
 
         public void HandleMovement()
         {
@@ -244,51 +298,13 @@ namespace CallSOS.Player
 
         }
 
-        private void GameInput_OnCrouchAction(object sender, System.EventArgs e)
+        private void GetCameraInput()
         {
-            _shouldBeCrouching = true;
+            PlayerInputs playerInputs = new PlayerInputs();
 
-            if (!_isCrouching)
-            {
-                _isCrouching = true;
-                TransitionToState(PlayerState.Crouching);
-                Motor.SetCapsuleDimensions(0.5f, CrouchedCapsuleHeight, CrouchedCapsuleHeight * 0.5f);
-                MeshRoot.localScale = new Vector3(1f, 0.5f, 1f);
-            }
+            playerInputs.CameraRotation = cameraController.Transform.rotation;
         }
 
-        private void GameInput_OnStandAction(object sender, System.EventArgs e)
-        {
-            if(_isCrouching)
-                _shouldBeCrouching = false;
-        }
-
-        private void GameInput_OnJumpAction(object sender, System.EventArgs e)
-        {
-            _timeSinceJumpRequested = 0;
-            _jumpRequested = true;
-        }
-        private void GameInput_OnSprintStartAction(object sender, System.EventArgs e)
-        {
-            _shouldBeSprinting = true;
-
-            if (!_isSprinting)
-            {
-                _isSprinting = true;
-                TransitionToState(PlayerState.Sprinting);
-            }
-        }
-
-        private void GameInput_OnSprintEndAction(object sender, System.EventArgs e)
-        {
-            if (_isSprinting)
-            {
-                _shouldBeSprinting = false;
-                _isSprinting = false;
-                TransitionToState(PlayerState.Walking);
-            }
-                
-        }
 
         /// <summary>
         /// Handles movement state transitions and enter/exit callbacks
@@ -718,12 +734,12 @@ namespace CallSOS.Player
 
         protected void OnLanded()
         {
-            playerSound.PlayLandingSound();
+            if (playerSound != null) playerSound.PlayLandingSound();
         }
 
         protected void OnLeaveStableGround()
         {
-            playerSound.PlayJumpSound();
+            if (playerSound != null) playerSound.PlayJumpSound();
         }
 
         public bool IsColliderValidForCollisions(Collider coll)

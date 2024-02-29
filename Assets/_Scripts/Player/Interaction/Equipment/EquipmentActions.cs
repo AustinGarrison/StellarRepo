@@ -10,8 +10,8 @@ namespace CallSOS.Player.Interaction.Equipment
         public InputAction mainInputAction;
         public InputAction altInputAction;
 
-        [SerializeField] private string mainActionText;
-        [SerializeField] private string altActionText;
+        [SerializeField] internal string mainActionText;
+        [SerializeField] internal string altActionText;
         public string MainActionText { get; private set; }
         public string AltActionText { get; private set; }
 

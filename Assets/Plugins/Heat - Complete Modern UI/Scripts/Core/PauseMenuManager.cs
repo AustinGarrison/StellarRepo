@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -32,6 +33,8 @@ namespace Michsky.UI.Heat
         bool allowClosing = true;
         float disableAfter = 0.6f;
 
+        public event EventHandler OnPauseToggle;
+
         public enum CursorVisibility { Default, Invisible, Visible }
 
         void Awake()
@@ -57,7 +60,15 @@ namespace Michsky.UI.Heat
 
         void Update()
         {
-            if (hotkey.triggered) { AnimatePauseMenu(); }
+            if (hotkey.triggered)
+            {
+                TogglePlayerState();
+                AnimatePauseMenu();
+            }
+        }
+        private void TogglePlayerState()
+        {
+            OnPauseToggle.Invoke(this, EventArgs.Empty);
         }
 
         public void AnimatePauseMenu()

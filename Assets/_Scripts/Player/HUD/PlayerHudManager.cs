@@ -1,6 +1,7 @@
+using CallSOS.Player.Interaction;
+using CallSOS.Player.Interaction.Equipment;
 using Michsky.UI.Heat;
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace CallSOS.Player.UI
@@ -8,19 +9,75 @@ namespace CallSOS.Player.UI
     public class PlayerHudManager : MonoBehaviour
     {
         [SerializeField] private PlayerControllerLocal playerController;
+        [SerializeField] private InteractControllerLocal interactController;
+        [SerializeField] private InventoryController inventoryController;
         [SerializeField] private ProgressBar staminaBar;
+
+        [SerializeField] private string interactKeyText;
+        [SerializeField] private TextMeshProUGUI interactText;
+        [SerializeField] private TextMeshProUGUI equipmentActionText;
+        [SerializeField] private TextMeshProUGUI equipmentAltActionText;
+        [SerializeField] internal EquipmentItem objectInHand;
+
+
+        private float startingStaminaValue = 100f;
+        private float depleatedStaminaValue = 0f;
 
         private void Start()
         {
-            staminaBar.currentValue = 100f;
+            staminaBar.currentValue = startingStaminaValue;
+            interactText.gameObject.SetActive(false);
+            equipmentActionText.gameObject.SetActive(false);
+            equipmentAltActionText.gameObject.SetActive(false);
+
+            interactController.OnInteractTextEvent += InteractController_OnInteractTextEvent;
+            inventoryController.OnGetEquipment += InventoryController_OnGetEquipment;
+        }
+
+        private void OnDestroy()
+        {
+            interactController.OnInteractTextEvent -= InteractController_OnInteractTextEvent;
+            inventoryController.OnGetEquipment -= InventoryController_OnGetEquipment;
+        }
+
+        private void InteractController_OnInteractTextEvent(object sender, InteractControllerLocal.ChangeTextEvent e)
+        {
+            if (e.Message == null)
+            {
+                interactText.gameObject.SetActive(false);
+                return;
+            }
+
+            interactText.text = e.Message;
+            interactText.gameObject.SetActive(true);
+        }
+
+        private void InventoryController_OnGetEquipment(object sender, InventoryController.GetEquipmentEventArgs e)
+        {
+            objectInHand = e.EquipmentItem;
+            if (objectInHand == null)
+            {
+                equipmentActionText.gameObject.SetActive(false);
+                equipmentAltActionText.gameObject.SetActive(false);
+            }
+            else
+            {
+                equipmentActionText.text = objectInHand.mainActionText;
+                equipmentActionText.gameObject.SetActive(true);
+
+                equipmentAltActionText.text = objectInHand.altActionText;
+                equipmentAltActionText.gameObject.SetActive(true);
+                
+            }
         }
 
         private void FixedUpdate()
         {
             float sprintTimer = playerController._timeSinceSprintStarted / playerController.MaxSprintDuration;
-            float remainingSprint = Mathf.Lerp(100f, 0f, sprintTimer);
+            float remainingSprint = Mathf.Lerp(startingStaminaValue, depleatedStaminaValue, sprintTimer);
 
             staminaBar.SetValue(remainingSprint);
+
         }
     }
 }
