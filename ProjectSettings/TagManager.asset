@@ -18,8 +18,8 @@ TagManager:
   - InteractItem
   - InventoryItem
   - IgnorePlayer
-  - 
-  - 
+  - Obstacles
+  - Ground
   - 
   - 
   - 
@@ -47,4 +47,10 @@ TagManager:
     locked: 0
   - name: Radar
     uniqueID: 2465464463
+    locked: 0
+  - name: Obstacles
+    uniqueID: 3451188249
+    locked: 0
+  - name: Ground
+    uniqueID: 1066629841
     locked: 0

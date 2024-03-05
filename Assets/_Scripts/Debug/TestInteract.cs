@@ -1,4 +1,5 @@
 using CallSOS.Player.Interaction;
+using CallSOS.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +19,7 @@ public class TestInteract : OperationAction
 
     public void PlayAudio(float stepVolume)
     {
+        Debug.Log("Test Audio");
         // pick & play a random footstep sound from the array,
         // excluding sound at index 0
         int n = Random.Range(1, m_Sounds.Length);
@@ -28,4 +30,5 @@ public class TestInteract : OperationAction
         m_Sounds[n] = m_Sounds[0];
         m_Sounds[0] = m_AudioSource.clip;
     }
+
 }

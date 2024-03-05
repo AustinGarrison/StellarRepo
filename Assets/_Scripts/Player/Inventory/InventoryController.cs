@@ -17,7 +17,7 @@ namespace CallSOS.Player.Interaction
     public class InventoryController : MonoBehaviour
     {
         [SerializeField] internal Transform worldHeldItemParent;
-        [SerializeField] private InteractControllerLocal interactController;
+        //[SerializeField] private InteractControllerLocal interactController;
 
         [SerializeField] private Transform holdPostion;
 
@@ -94,8 +94,8 @@ namespace CallSOS.Player.Interaction
             GameInputPlayer.Instance.OnResourceHUDToggled += GameInput_OnResourceHUDToggled;
             GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
 
-            interactController.OnEquipmentItemInteract += InteractController_OnHoldItemInteract;
-            interactController.OnResourceItemInteract += InteractController_OnResourceItemInteract;
+            //interactController.OnEquipmentItemInteract += InteractController_OnHoldItemInteract;
+            //interactController.OnResourceItemInteract += InteractController_OnResourceItemInteract;
         }
 
         private void OnDisable()
@@ -103,8 +103,8 @@ namespace CallSOS.Player.Interaction
             GameInputPlayer.Instance.OnResourceHUDToggled -= GameInput_OnResourceHUDToggled;
             GameInputPlayer.Instance.OnAltInteractAction -= GameInput_OnAltInteractAction;
 
-            interactController.OnEquipmentItemInteract -= InteractController_OnHoldItemInteract;
-            interactController.OnResourceItemInteract -= InteractController_OnResourceItemInteract;
+            //interactController.OnEquipmentItemInteract -= InteractController_OnHoldItemInteract;
+            //interactController.OnResourceItemInteract -= InteractController_OnResourceItemInteract;
         }
 
         private void Update()

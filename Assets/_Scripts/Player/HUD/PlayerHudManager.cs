@@ -1,5 +1,6 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.Interaction.Equipment;
+using CallSOS.Utilities;
 using Michsky.UI.Heat;
 using TMPro;
 using UnityEngine;
@@ -8,8 +9,10 @@ namespace CallSOS.Player.UI
 {
     public class PlayerHudManager : MonoBehaviour
     {
-        [SerializeField] private PlayerControllerLocal playerController;
-        [SerializeField] private InteractControllerLocal interactController;
+        //[SerializeField] private PlayerControllerLocal playerController;
+        [SerializeField] private TopDownPlayerController topDownPlayerController;
+        //[SerializeField] private InteractControllerLocal interactController;
+        [SerializeField] private CursorController interactController;
         [SerializeField] private InventoryController inventoryController;
         [SerializeField] private ProgressBar staminaBar;
 
@@ -73,7 +76,8 @@ namespace CallSOS.Player.UI
 
         private void FixedUpdate()
         {
-            float sprintTimer = playerController._timeSinceSprintStarted / playerController.MaxSprintDuration;
+            //float sprintTimer = playerController._timeSinceSprintStarted / playerController.MaxSprintDuration;
+            float sprintTimer = topDownPlayerController._timeSinceSprintStarted / topDownPlayerController.MaxSprintDuration;
             float remainingSprint = Mathf.Lerp(startingStaminaValue, depleatedStaminaValue, sprintTimer);
 
             staminaBar.SetValue(remainingSprint);
