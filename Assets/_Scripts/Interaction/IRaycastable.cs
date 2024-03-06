@@ -6,7 +6,7 @@ namespace CallSOS.Player.Interaction
     public interface IRaycastable
     {
         CursorType GetCursorType();
-        bool CanHandleRaycast(CursorController callingController);
+        bool CanHandleRaycast(Utilities.ObjectInteractController callingController);
         InteractItem GetInteractItem();
     }
 }

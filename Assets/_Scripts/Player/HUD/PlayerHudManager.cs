@@ -9,15 +9,14 @@ namespace CallSOS.Player.UI
 {
     public class PlayerHudManager : MonoBehaviour
     {
-        //[SerializeField] private PlayerControllerLocal playerController;
         [SerializeField] private TopDownPlayerController topDownPlayerController;
-        //[SerializeField] private InteractControllerLocal interactController;
-        [SerializeField] private CursorController interactController;
+        [SerializeField] private ObjectInteractController interactController;
         [SerializeField] private InventoryController inventoryController;
         [SerializeField] private ProgressBar staminaBar;
 
         [SerializeField] private string interactKeyText;
         [SerializeField] private TextMeshProUGUI interactText;
+        [SerializeField] private RectTransform interactTextParent;
         [SerializeField] private TextMeshProUGUI equipmentActionText;
         [SerializeField] private TextMeshProUGUI equipmentAltActionText;
         [SerializeField] internal EquipmentItem objectInHand;
@@ -37,13 +36,32 @@ namespace CallSOS.Player.UI
             inventoryController.OnGetEquipment += InventoryController_OnGetEquipment;
         }
 
+        private void Update()
+        {
+            UpdateCursorTextPosition();
+        }
+
+        private void UpdateCursorTextPosition()
+        {
+            Vector3 mousePosition = Input.mousePosition;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                interactTextParent.parent as RectTransform,
+                mousePosition,
+                null,
+                out Vector2 localPoint
+            );
+
+            interactTextParent.localPosition = localPoint;
+        }
+
         private void OnDestroy()
         {
             interactController.OnInteractTextEvent -= InteractController_OnInteractTextEvent;
             inventoryController.OnGetEquipment -= InventoryController_OnGetEquipment;
         }
 
-        private void InteractController_OnInteractTextEvent(object sender, InteractControllerLocal.ChangeTextEvent e)
+        private void InteractController_OnInteractTextEvent(object sender, ObjectInteractController.ChangeTextEvent e)
         {
             if (e.Message == null)
             {

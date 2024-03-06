@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using System;
 using TMPro;
+using CallSOS.Utilities;
 
 namespace CallSOS.Player.Interaction
 {
@@ -17,7 +18,7 @@ namespace CallSOS.Player.Interaction
     public class InventoryController : MonoBehaviour
     {
         [SerializeField] internal Transform worldHeldItemParent;
-        //[SerializeField] private InteractControllerLocal interactController;
+        [SerializeField] private ObjectInteractController interactController;
 
         [SerializeField] private Transform holdPostion;
 
@@ -47,6 +48,7 @@ namespace CallSOS.Player.Interaction
 
         // Helpers
         bool isInCooldown = false;
+        bool isInitialized = false;
         int twoHandedSlot = 4;
 
         #region EventArgs
@@ -73,19 +75,19 @@ namespace CallSOS.Player.Interaction
             DropHeldItem();
         }
 
-        private void InteractController_OnHoldItemInteract(object sender, InteractControllerLocal.EquipmentItemEventArgs e)
+        private void InteractController_OnHoldItemInteract(object sender, ObjectInteractController.EquipmentItemEventArgs e)
         {
             FindEmptyHotbarSlot(e.EquipmentItem);
         }
 
-        private void InteractController_OnResourceItemInteract(object sender, InteractControllerLocal.ResourceItemEventArgs e)
+        private void InteractController_OnResourceItemInteract(object sender, ObjectInteractController.ResourceItemEventArgs e)
         {
             AddResource(e.ResourceItem.itemScriptable);
         }
 
         #endregion
 
-        internal void Init()
+        internal void Initialize()
         {
             //Turns off inventory if its on
             if (invPanel != null && invPanel.activeSelf)
@@ -94,8 +96,10 @@ namespace CallSOS.Player.Interaction
             GameInputPlayer.Instance.OnResourceHUDToggled += GameInput_OnResourceHUDToggled;
             GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
 
-            //interactController.OnEquipmentItemInteract += InteractController_OnHoldItemInteract;
-            //interactController.OnResourceItemInteract += InteractController_OnResourceItemInteract;
+            interactController.OnEquipmentItemInteract += InteractController_OnHoldItemInteract;
+            interactController.OnResourceItemInteract += InteractController_OnResourceItemInteract;
+
+            isInitialized = true;
         }
 
         private void OnDisable()
@@ -103,12 +107,13 @@ namespace CallSOS.Player.Interaction
             GameInputPlayer.Instance.OnResourceHUDToggled -= GameInput_OnResourceHUDToggled;
             GameInputPlayer.Instance.OnAltInteractAction -= GameInput_OnAltInteractAction;
 
-            //interactController.OnEquipmentItemInteract -= InteractController_OnHoldItemInteract;
-            //interactController.OnResourceItemInteract -= InteractController_OnResourceItemInteract;
+            interactController.OnEquipmentItemInteract -= InteractController_OnHoldItemInteract;
+            interactController.OnResourceItemInteract -= InteractController_OnResourceItemInteract;
         }
 
         private void Update()
         {
+            if (!isInitialized) return;
             GetScrollValue();
         }
 
@@ -374,18 +379,18 @@ namespace CallSOS.Player.Interaction
             if (invPanel.activeSelf)
             {
                 invPanel.SetActive(false);
-                crosshair.SetActive(true);
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+                //crosshair.SetActive(true);
+                //Cursor.lockState = CursorLockMode.Locked;
+                //Cursor.visible = false;
             }
             else if (!invPanel.activeSelf)
             {
 
                 UpdateResourceList();
                 invPanel.SetActive(true);
-                crosshair.SetActive(false);
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                //crosshair.SetActive(false);
+                //Cursor.lockState = CursorLockMode.None;
+                //Cursor.visible = true;
             }
         }
 

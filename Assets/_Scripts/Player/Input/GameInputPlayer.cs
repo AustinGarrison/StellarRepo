@@ -32,7 +32,14 @@ public class GameInputPlayer : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance != null)
+        {
+            DestroyImmediate(Instance);
+        }
+        else
+        {
+            Instance = this;
+        }
 
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.Enable();

@@ -19,7 +19,6 @@ public class TestInteract : OperationAction
 
     public void PlayAudio(float stepVolume)
     {
-        Debug.Log("Test Audio");
         // pick & play a random footstep sound from the array,
         // excluding sound at index 0
         int n = Random.Range(1, m_Sounds.Length);

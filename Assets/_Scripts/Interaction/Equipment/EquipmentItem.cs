@@ -71,10 +71,10 @@ namespace CallSOS.Player.Interaction.Equipment
 
         public CursorType GetCursorType()
         {
-            return CursorType.Point;
+            return CursorType.Grab;
         }
 
-        public bool CanHandleRaycast(CursorController callingController)
+        public bool CanHandleRaycast(Utilities.ObjectInteractController callingController)
         {
             return true;
         }

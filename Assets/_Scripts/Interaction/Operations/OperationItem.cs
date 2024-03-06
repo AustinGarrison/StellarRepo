@@ -26,7 +26,7 @@ public class OperationItem : InteractItem, IRaycastable
         return CursorType.Point;
     }
 
-    public bool CanHandleRaycast(CursorController callingController)
+    public bool CanHandleRaycast(CallSOS.Utilities.ObjectInteractController callingController)
     {
         return true;
     }

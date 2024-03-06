@@ -1,3 +1,4 @@
+using CallSOS.Utilities;
 using FishNet.Component.Spawning;
 using FishNet.Demo.AdditiveScenes;
 using FishNet.Object;
@@ -68,7 +69,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
     //Private
     private KinematicCharacterMotor Motor;
     private CameraController cameraController;
-    private InteractController inventoryController;
     private Camera playerCamera;
     private Collider[] _probedColliders = new Collider[8];
     private RaycastHit[] _probedHits = new RaycastHit[8];
@@ -129,9 +129,6 @@ public class PlayerController : NetworkBehaviour, ICharacterController
         playerCamera = Camera.main;
         cameraController = playerCamera.GetComponent<CameraController>();
         cameraController.BaseAwake();
-
-        inventoryController = GetComponent<InteractController>();
-        inventoryController.Init();
 
         // Tell camera to follow transform
         cameraController.SetFollowTransform(cameraFollowPoint);

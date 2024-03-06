@@ -1,5 +1,6 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.SFX;
+using CallSOS.Utilities;
 using KinematicCharacterController;
 using Michsky.UI.Heat;
 using UnityEngine;
@@ -58,7 +59,6 @@ namespace CallSOS.Player
         private KinematicCharacterMotor Motor;
         private PlayerSoundManager playerSound;
         private CameraControllerLocal cameraController;
-        private InteractControllerLocal interactController;
         private InventoryController inventoryController;
         [SerializeField] private PauseMenuManager pauseMenuManager;
 
@@ -122,11 +122,8 @@ namespace CallSOS.Player
             cameraController = playerCamera.GetComponent<CameraControllerLocal>();
             cameraController.BaseAwake();
 
-            interactController = GetComponent<InteractControllerLocal>();
-            interactController.Init();
-
             inventoryController = GetComponent<InventoryController>();
-            inventoryController.Init();
+            inventoryController.Initialize();
 
             playerSound = GetComponentInChildren<PlayerSoundManager>();
             if(playerSound != null) playerSound.Init();

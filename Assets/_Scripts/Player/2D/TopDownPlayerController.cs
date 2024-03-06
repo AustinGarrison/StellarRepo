@@ -52,9 +52,7 @@ namespace CallSOS.Player
         //Private
         private KinematicCharacterMotor Motor;
         private PlayerSoundManager playerSound;
-        //private InteractControllerLocal interactController;
-        [SerializeField] private TopDownInteractController topDownInteractController;
-        [SerializeField] private CursorController cursorController;
+        [SerializeField] private ObjectInteractController interactController;
         private InventoryController inventoryController;
         [SerializeField] private PauseMenuManager pauseMenuManager;
 
@@ -99,12 +97,12 @@ namespace CallSOS.Player
         private void Start()
         {
             Motor.enabled = false;
-            Init();
+            Initialize();
             Motor.enabled = true;
             return;
         }
 
-        internal void Init()
+        internal void Initialize()
         {
             GameInputPlayer.Instance.OnJumpAction += GameInput_OnJumpAction;
             GameInputPlayer.Instance.OnCrouchAction += GameInput_OnCrouchAction;
@@ -116,17 +114,10 @@ namespace CallSOS.Player
 
             playerCamera = Camera.main;
 
-            //interactController = GetComponent<InteractControllerLocal>();
-            //interactController.Init();
-
-            if(topDownInteractController != null)
-                topDownInteractController.Initialize();
-
-            if (cursorController != null)
-                cursorController.Initialize();
+            if(interactController != null) interactController.Initialize();
 
             inventoryController = GetComponent<InventoryController>();
-            inventoryController.Init();
+            if (inventoryController != null) inventoryController.Initialize();
 
             playerSound = GetComponentInChildren<PlayerSoundManager>();
             if (playerSound != null) playerSound.Init();

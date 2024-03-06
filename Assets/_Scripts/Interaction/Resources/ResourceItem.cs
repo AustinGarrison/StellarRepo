@@ -1,3 +1,4 @@
+using CallSOS.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,17 +6,32 @@ using UnityEngine;
 namespace CallSOS.Player.Interaction
 {
     // Items that are not equipment. Can be dropped or brought back to player ship. Have no utility use.
-    public class ResourceItem : InteractItem
+    public class ResourceItem : InteractItem, IRaycastable
     {
         private void Awake()
         {
             interactType = InteractType.InventoryItem;
         }
 
-        public override void InteractWith()//InteractControllerLocal player)
+        public override void InteractWith()
         {
             //base.InteractWith(); // Doesnt spawn player when active?
             Debug.Log("InventoryItem/InteractWith");
+        }
+
+        public CursorType GetCursorType()
+        {
+            return CursorType.Grab;
+        }
+
+        public bool CanHandleRaycast(Utilities.ObjectInteractController callingController)
+        {
+            return true;
+        }
+
+        public InteractItem GetInteractItem()
+        {
+            return GetComponent<InteractItem>();
         }
     }
 }

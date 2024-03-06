@@ -98,10 +98,10 @@ namespace Michsky.UI.Heat
 
             FadeInBackground();
 
-            Cursor.lockState = menuCursorState;
+            //Cursor.lockState = menuCursorState;
 
-            if (menuCursorVisibility == CursorVisibility.Visible) { Cursor.visible = true; }
-            else if (menuCursorVisibility != CursorVisibility.Default) { Cursor.visible = false; }
+            //if (menuCursorVisibility == CursorVisibility.Visible) { Cursor.visible = true; }
+            //else if (menuCursorVisibility != CursorVisibility.Default) { Cursor.visible = false; }
 
             if (continueButton != null && Gamepad.current != null)
             {
@@ -119,15 +119,15 @@ namespace Michsky.UI.Heat
             StopCoroutine("DisablePauseCanvas");
             StartCoroutine("DisablePauseCanvas");
 
-            if (gameCursorVisibility == CursorVisibility.Visible) { Cursor.visible = true; }
-            else if (gameCursorVisibility != CursorVisibility.Default) { Cursor.visible = false; }
+            //if (gameCursorVisibility == CursorVisibility.Visible) { Cursor.visible = true; }
+            //else if (gameCursorVisibility != CursorVisibility.Default) { Cursor.visible = false; }
 
             isOn = false;
             onClose.Invoke();
 
             FadeOutBackground();
 
-            Cursor.lockState = gameCursorState;
+            //Cursor.lockState = gameCursorState;
         }
 
         public void FadeInBackground()
