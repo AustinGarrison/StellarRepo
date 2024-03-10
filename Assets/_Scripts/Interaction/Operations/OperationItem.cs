@@ -6,6 +6,7 @@ public class OperationItem : InteractItem, IRaycastable
 {
     public OperationAction uniqueOperation;
     public string interactText;
+    public string localizationKey;
 
 
     private void Awake()

@@ -68,7 +68,7 @@ namespace Michsky.UI.Heat
             GUILayout.BeginHorizontal();
             GUILayout.Space(8);
 
-            searchString = GUILayout.TextField(searchString, GUI.skin.FindStyle("ToolbarSearchTextField"), GUILayout.Width(textFieldWidth + 24));
+            searchString = GUILayout.TextField(searchString, GUI.skin.FindStyle("ToolbarSeachTextField"), GUILayout.Width(textFieldWidth + 24));
             if (!string.IsNullOrEmpty(searchString) && GUILayout.Button(new GUIContent("", "Clear search bar"), GUI.skin.FindStyle("ToolbarSearchCancelButton")))
             {
                 searchString = "";

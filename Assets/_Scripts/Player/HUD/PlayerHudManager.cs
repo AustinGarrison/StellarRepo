@@ -15,10 +15,16 @@ namespace CallSOS.Player.UI
         [SerializeField] private ProgressBar staminaBar;
 
         [SerializeField] private string interactKeyText;
+        
+        [Header("Cursor Text")]
         [SerializeField] private TextMeshProUGUI interactText;
         [SerializeField] private RectTransform interactTextParent;
+        [SerializeField] private LocalizedObject interactTextLocalize;
+
+        [Header("Equipment Ability Text")]
         [SerializeField] private TextMeshProUGUI equipmentActionText;
         [SerializeField] private TextMeshProUGUI equipmentAltActionText;
+
         [SerializeField] internal EquipmentItem objectInHand;
 
 
@@ -63,13 +69,13 @@ namespace CallSOS.Player.UI
 
         private void InteractController_OnInteractTextEvent(object sender, ObjectInteractController.ChangeTextEvent e)
         {
-            if (e.Message == null)
+            if (e.LocalizedKey == null)
             {
                 interactText.gameObject.SetActive(false);
                 return;
             }
 
-            interactText.text = e.Message;
+            interactTextLocalize.localizationKey = e.LocalizedKey;
             interactText.gameObject.SetActive(true);
         }
 

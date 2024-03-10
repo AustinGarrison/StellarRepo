@@ -15,3 +15,4 @@ MonoBehaviour:
   itemName: RedSquare
   prefab: {fileID: 8518168273094446100, guid: 5e7df557590113b42a1a604b81ee378f, type: 3}
   interactText: Grab Red Square
+  localizationKey: ResourceRedSquare

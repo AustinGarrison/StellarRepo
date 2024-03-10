@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b70abea511859e248a1cf2c44035e321, type: 3}
   m_Name: German (de-DE)
   m_EditorClassIdentifier: 
-  localizationSettings: {fileID: 11400000, guid: 2cbd73cf0fc79bf4ab2e27e18b1ba7c8, type: 2}
+  localizationSettings: {fileID: 11400000, guid: 2cbd73cf0fc79bf4ab2e27e18b1ba7c8,
+    type: 2}
   languageID: de-DE
   languageName: German
   localizedName: Deutsch
@@ -764,5 +765,31 @@ MonoBehaviour:
       spriteValue: {fileID: 0}
     - key: LoadTitle
       value: Belastung
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+  - table: {fileID: 11400000, guid: 912d7da671cd83c46bcf175244f07c64, type: 2}
+    tableContent:
+    - key: ResourcePickup
+      value: "\rAbholen"
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceDrop
+      value: Fallen
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceRedSquare
+      value: rot Quadrat
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceBlueSquare
+      value: blau Quadrat
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceAudioTest
+      value: der Klangtest
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceInventory
+      value: Inventar
       audioValue: {fileID: 0}
       spriteValue: {fileID: 0}

@@ -6,4 +6,5 @@ public class ItemSO : ScriptableObject
     public string itemName;
     public GameObject prefab;
     public string interactText;
+    public string localizationKey;
 }

@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b70abea511859e248a1cf2c44035e321, type: 3}
   m_Name: English (en-US)
   m_EditorClassIdentifier: 
-  localizationSettings: {fileID: 11400000, guid: 2cbd73cf0fc79bf4ab2e27e18b1ba7c8, type: 2}
+  localizationSettings: {fileID: 11400000, guid: 2cbd73cf0fc79bf4ab2e27e18b1ba7c8,
+    type: 2}
   languageID: en-US
   languageName: English
   localizedName: English (US)
@@ -765,5 +766,31 @@ MonoBehaviour:
       spriteValue: {fileID: 0}
     - key: LoadTitle
       value: Load
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+  - table: {fileID: 11400000, guid: 912d7da671cd83c46bcf175244f07c64, type: 2}
+    tableContent:
+    - key: ResourcePickup
+      value: Pick up
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceDrop
+      value: Drop
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceRedSquare
+      value: Red Square
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceBlueSquare
+      value: Blue Square
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceAudioTest
+      value: Audio Test
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+    - key: ResourceInventory
+      value: Inventory
       audioValue: {fileID: 0}
       spriteValue: {fileID: 0}

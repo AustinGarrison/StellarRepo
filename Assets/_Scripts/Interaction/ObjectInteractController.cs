@@ -42,11 +42,11 @@ namespace CallSOS.Utilities
 
         public class ChangeTextEvent : EventArgs
         {
-            public string Message { get; }
+            public string LocalizedKey { get; }
 
-            public ChangeTextEvent(string message)
+            public ChangeTextEvent(string localizedKey)
             {
-                Message = message;
+                LocalizedKey = localizedKey;
             }
         }
 
@@ -139,17 +139,17 @@ namespace CallSOS.Utilities
                     OperationItem operationItem = interactItem.GetComponentInParent<OperationItem>();
 
                     if (operationItem != null)
-                        itemInteractTypeText = operationItem.interactText;
+                        itemInteractTypeText = operationItem.localizationKey;
                     else
                         itemInteractTypeText = "Interact";
                     break;
 
                 case InteractType.HoldItem:
-                    itemInteractTypeText = interactItem.itemScriptable.interactText;
+                    itemInteractTypeText = interactItem.itemScriptable.localizationKey;
                     break;
 
                 case InteractType.InventoryItem:
-                    itemInteractTypeText = interactItem.itemScriptable.interactText;
+                    itemInteractTypeText = interactItem.itemScriptable.localizationKey;
                     break;
 
             }
