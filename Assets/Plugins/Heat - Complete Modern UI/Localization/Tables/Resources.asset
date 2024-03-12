@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69fd36d4daedf43479c8f4036f7b2406, type: 3}
   m_Name: Resources
   m_EditorClassIdentifier: 
-  tableID: Resources
+  tableID: Table #1
   localizationSettings: {fileID: 11400000, guid: 2cbd73cf0fc79bf4ab2e27e18b1ba7c8,
     type: 2}
   tableContent:
