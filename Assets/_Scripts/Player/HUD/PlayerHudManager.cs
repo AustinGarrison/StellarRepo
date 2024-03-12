@@ -9,7 +9,7 @@ namespace CallSOS.Player.UI
 {
     public class PlayerHudManager : MonoBehaviour
     {
-        [SerializeField] private TopDownPlayerController topDownPlayerController;
+        [SerializeField] private NetworkedTopDownPlayerController topDownPlayerController;
         [SerializeField] private ObjectInteractController interactController;
         [SerializeField] private InventoryController inventoryController;
         [SerializeField] private ProgressBar staminaBar;
@@ -26,7 +26,6 @@ namespace CallSOS.Player.UI
         [SerializeField] private TextMeshProUGUI equipmentAltActionText;
 
         [SerializeField] internal EquipmentItem objectInHand;
-
 
         private float startingStaminaValue = 100f;
         private float depleatedStaminaValue = 0f;
