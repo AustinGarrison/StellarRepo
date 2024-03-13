@@ -7542,8 +7542,7 @@ MonoBehaviour:
   UIInvObjectPrefab: {fileID: 486024413833497395, guid: 850e159ba4485fc47a58b171c5c964ba,
     type: 3}
   invPanel: {fileID: 9005417534664000306}
-  UIinvObjectHolder: {fileID: 486024413833497394, guid: 850e159ba4485fc47a58b171c5c964ba,
-    type: 3}
+  UIinvObjectHolder: {fileID: 1910593958702077287}
   resourceObjects: []
   hotbarSlots:
   - heldItem: {fileID: 0}
