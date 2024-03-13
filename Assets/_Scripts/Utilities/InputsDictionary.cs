@@ -4,26 +4,11 @@ using UnityEngine;
 
 namespace CallSOS.Utilities
 {
-    public class InputDictionary : MonoBehaviour
+    public static class InputsDictionary
     {
-        public static InputDictionary Instance { get { return instance; } }
 
-        private static InputDictionary instance;
-
-        private void Awake()
+        internal static Dictionary<string, string> PCKeyLabels = new Dictionary<string, string>()
         {
-            if (instance != null)
-            {
-                DestroyImmediate(instance);
-            }
-            else
-            {
-                instance = this;
-            }
-        }
-
-        internal Dictionary<string, string> PCKeyLabels = new Dictionary<string, string>()
-        { 
 
             {"<Keyboard>/a", "A"},
             {"<Keyboard>/b", "B"},

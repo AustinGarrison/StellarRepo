@@ -1,13 +1,14 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.Interaction.Equipment;
 using CallSOS.Utilities;
+using FishNet.Object;
 using Michsky.UI.Heat;
 using TMPro;
 using UnityEngine;
 
 namespace CallSOS.Player.UI
 {
-    public class PlayerHudManager : MonoBehaviour
+    public class PlayerHudManager : NetworkBehaviour
     {
         [SerializeField] private NetworkedTopDownPlayerController topDownPlayerController;
         [SerializeField] private ObjectInteractController interactController;
@@ -30,7 +31,7 @@ namespace CallSOS.Player.UI
         private float startingStaminaValue = 100f;
         private float depleatedStaminaValue = 0f;
 
-        private void Start()
+        internal void Initialize()
         {
             staminaBar.currentValue = startingStaminaValue;
             interactText.gameObject.SetActive(false);
@@ -43,6 +44,11 @@ namespace CallSOS.Player.UI
 
         private void Update()
         {
+            if (!base.IsOwner)
+            {
+                return;
+            }
+
             UpdateCursorTextPosition();
         }
 

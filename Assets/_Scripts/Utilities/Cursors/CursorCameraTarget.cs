@@ -1,9 +1,9 @@
-using Unity.VisualScripting;
+using FishNet.Object;
 using UnityEngine;
 
 namespace CallSOS.Utilities
 {
-    public class CursorCameraTarget : MonoBehaviour
+    public class CursorCameraTarget : NetworkBehaviour
     {
         [SerializeField] Camera playerCamera;
         [SerializeField] Transform player;
@@ -15,6 +15,11 @@ namespace CallSOS.Utilities
 
         void Update()
         {
+            if (!base.IsOwner)
+            {
+                return;
+            }
+
             // Get the mouse position in world space
             Vector3 mousePosition = playerCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, playerCamera.transform.position.y - player.position.y));
 

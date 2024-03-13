@@ -1,12 +1,13 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.Interaction.Equipment;
+using FishNet.Object;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace CallSOS.Utilities
 {
-    public class ObjectInteractController : MonoBehaviour
+    public class ObjectInteractController : NetworkBehaviour
     {      
         [SerializeField] float raycastRadius = 1f;
 
@@ -54,6 +55,7 @@ namespace CallSOS.Utilities
 
         public void Initialize()
         {
+            enabled = true;
             GameInputPlayer.Instance.OnClickAction += Instance_OnClickAction;           
             isInitialized = true;
         }
@@ -70,6 +72,12 @@ namespace CallSOS.Utilities
 
         private void Update()
         {
+            if (!base.IsOwner)
+            {
+                enabled = false;
+                return;
+            }
+
             if (!isInitialized) return;
             if (InteractWithUI()) return;
             if (InteractWithComponent3D()) return;
@@ -148,7 +156,7 @@ namespace CallSOS.Utilities
                     itemInteractTypeText = interactItem.itemScriptable.localizationKey;
                     break;
 
-                case InteractType.InventoryItem:
+                case InteractType.ResourceItem:
                     itemInteractTypeText = interactItem.itemScriptable.localizationKey;
                     break;
 
@@ -171,8 +179,8 @@ namespace CallSOS.Utilities
                     case InteractType.HoldItem:
                         InteractWithHoldItem(interactItem);
                         break;
-                    case InteractType.InventoryItem:
-                        InteractWithInventoryItem(interactItem);
+                    case InteractType.ResourceItem:
+                        InteractWithResourceItem(interactItem);
                         break;
                     default:
                         Debug.LogError("No interaction type found in Hit");
@@ -205,19 +213,14 @@ namespace CallSOS.Utilities
             }
         }
 
-        private void InteractWithInventoryItem(InteractItem interactItem)
+        private void InteractWithResourceItem(InteractItem interactItem)
         {
-            //if (hit.transform.GetComponent<InventoryItem>() == null)
-            //    return;
-            ResourceItem inventoryItem = interactItem.GetComponent<ResourceItem>();
+            ResourceItem resourceItem = interactItem.GetComponent<ResourceItem>();
 
-            if (inventoryItem != null)
+            if (resourceItem != null)
             {
-                inventoryItem.InteractWith();
-                OnResourceItemInteract?.Invoke(this, new ResourceItemEventArgs(inventoryItem));
-
-                // Despawn Object
-                Destroy(interactItem.transform.gameObject);
+                OnResourceItemInteract?.Invoke(this, new ResourceItemEventArgs(resourceItem));
+                resourceItem.InteractWith();
             }
         }
 

@@ -10,13 +10,16 @@ namespace CallSOS.Player.Interaction
     {
         private void Awake()
         {
-            interactType = InteractType.InventoryItem;
+            interactType = InteractType.ResourceItem;
         }
 
         public override void InteractWith()
         {
             //base.InteractWith(); // Doesnt spawn player when active?
             Debug.Log("InventoryItem/InteractWith");
+
+            // Despawn Object
+            Destroy(gameObject);
         }
 
         public CursorType GetCursorType()

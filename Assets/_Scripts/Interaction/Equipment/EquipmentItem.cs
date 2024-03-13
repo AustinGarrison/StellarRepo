@@ -53,7 +53,7 @@ namespace CallSOS.Player.Interaction.Equipment
             
             string label = "";
 
-            if (InputDictionary.Instance.PCKeyLabels.TryGetValue(bindingPath, out label))
+            if (InputsDictionary.PCKeyLabels.TryGetValue(bindingPath, out label))
             {
                 return label;
             }

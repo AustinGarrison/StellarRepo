@@ -1,11 +1,12 @@
 using CallSOS.Player.Interaction.Equipment;
 using System.Collections.Generic;
 using System.Collections;
+using CallSOS.Utilities;
+using FishNet.Object;
 using UnityEngine.UI;
 using UnityEngine;
 using System;
 using TMPro;
-using CallSOS.Utilities;
 
 namespace CallSOS.Player.Interaction
 {
@@ -15,7 +16,7 @@ namespace CallSOS.Player.Interaction
         TwoHanded
     }
 
-    public class InventoryController : MonoBehaviour
+    public class InventoryController : NetworkBehaviour
     {
         [SerializeField] internal Transform worldHeldItemParent;
         [SerializeField] private ObjectInteractController interactController;
@@ -102,8 +103,9 @@ namespace CallSOS.Player.Interaction
             isInitialized = true;
         }
 
-        private void OnDisable()
+        public override void OnStopClient()
         {
+            base.OnStopClient();
             GameInputPlayer.Instance.OnResourceHUDToggled -= GameInput_OnResourceHUDToggled;
             GameInputPlayer.Instance.OnAltInteractAction -= GameInput_OnAltInteractAction;
 

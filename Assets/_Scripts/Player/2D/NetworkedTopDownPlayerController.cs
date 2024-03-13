@@ -55,14 +55,9 @@ namespace CallSOS.Player
         //Private
         private KinematicCharacterMotor Motor;
         private PlayerSoundManager playerSound;
-        [SerializeField] private ObjectInteractController interactController;
-        private InventoryController inventoryController;
-        [SerializeField] private GameObject PauseMenuPrefab;
         private PauseMenuManager pauseMenuManager;
 
-
         private float currentMoveSpeed;
-        private Camera playerCamera;
         private Collider[] _probedColliders = new Collider[8];
         private RaycastHit[] _probedHits = new RaycastHit[8];
         private Vector3 _moveInputVector;
@@ -104,8 +99,12 @@ namespace CallSOS.Player
             if(base.IsOwner)
             {
                 Motor.enabled = false;
-                Initialize();
+
+                playerSound = GetComponentInChildren<PlayerSoundManager>();
+
                 Motor.enabled = true;
+
+                isInitialized = true;
                 return;
             }
             else
@@ -114,37 +113,23 @@ namespace CallSOS.Player
             }
         }
 
-        internal void Initialize()
+        internal void SubscribedEvents(PauseMenuManager pauseMenu)
         {
+            if (pauseMenu != null)
+            {
+                Debug.Log(pauseMenu);
+                pauseMenuManager = pauseMenu;
+                pauseMenuManager.Initialize();
+                pauseMenuManager.OnPauseToggle += PauseMenuManager_OnPauseToggle;
+            }
+
             GameInputPlayer.Instance.OnJumpAction += GameInput_OnJumpAction;
             GameInputPlayer.Instance.OnCrouchAction += GameInput_OnCrouchAction;
             GameInputPlayer.Instance.OnStandAction += GameInput_OnStandAction;
             GameInputPlayer.Instance.OnSprintStartAction += GameInput_OnSprintStartAction;
             GameInputPlayer.Instance.OnSprintEndAction += GameInput_OnSprintEndAction;
-
-            InstantiatePauseMenu();
-
-            playerCamera = Camera.main;
-
-            if (interactController != null) interactController.Initialize();
-
-            inventoryController = GetComponent<InventoryController>();
-            if (inventoryController != null) inventoryController.Initialize();
-
-            playerSound = GetComponentInChildren<PlayerSoundManager>();
-            if (playerSound != null) playerSound.Init();
-
-            // Tell camera to follow transform
-
-            isInitialized = true;
         }
 
-        private void InstantiatePauseMenu()
-        {
-            GameObject PauseMenu = Instantiate(PauseMenuPrefab);
-            pauseMenuManager = PauseMenu.GetComponentInChildren<PauseMenuManager>();
-            pauseMenuManager.OnPauseToggle += PauseMenuManager_OnPauseToggle;
-        }
 
         #region Events
 
