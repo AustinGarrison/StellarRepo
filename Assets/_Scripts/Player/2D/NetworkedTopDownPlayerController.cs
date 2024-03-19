@@ -117,7 +117,6 @@ namespace CallSOS.Player
         {
             if (pauseMenu != null)
             {
-                Debug.Log(pauseMenu);
                 pauseMenuManager = pauseMenu;
                 pauseMenuManager.Initialize();
                 pauseMenuManager.OnPauseToggle += PauseMenuManager_OnPauseToggle;

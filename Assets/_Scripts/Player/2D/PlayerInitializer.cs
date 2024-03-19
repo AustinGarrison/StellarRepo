@@ -2,24 +2,23 @@ using CallSOS.Player.Interaction;
 using CallSOS.Player.SFX;
 using CallSOS.Player.UI;
 using CallSOS.Utilities;
-using FishNet.Object;
 using Michsky.UI.Heat;
-using System.Collections;
-using System.Collections.Generic;
+using FishNet.Object;
 using UnityEngine;
 
 namespace CallSOS.Player
 {
     public class PlayerInitializer : NetworkBehaviour
     {
-        [SerializeField] private GameObject PauseMenuPrefab;
         [SerializeField] private NetworkedTopDownPlayerController playerController;
         [SerializeField] private ObjectInteractController interactController;
-        [SerializeField] private PlayerSoundManager playerSound;
-        [SerializeField] private GameInputPlayer playerInput;
         [SerializeField] private InventoryController inventoryController;
+        [SerializeField] private PlayerSoundManager playerSound;
         [SerializeField] private PlayerHudManager hudManager;
+        [SerializeField] private GameInputPlayer playerInput;
         [SerializeField] private AudioListener audioListener;
+        [SerializeField] private GameObject PauseMenuPrefab;
+        [SerializeField] private GameObject PlayerMesh;
 
         public override void OnStartClient()
         {
@@ -28,6 +27,14 @@ namespace CallSOS.Player
             if (base.IsOwner)
             {
                 Initialize();
+            }
+            else
+            {
+                foreach (Transform child in transform)
+                {
+                    child.gameObject.SetActive(false);
+                }
+                PlayerMesh.gameObject.SetActive(true);
             }
         }
 

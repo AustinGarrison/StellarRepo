@@ -14,5 +14,5 @@ public class InteractItem : MonoBehaviour, IInteractItem
     public ItemSO itemScriptable;
     [HideInInspector] public InteractType interactType;
 
-    public virtual void InteractWith() { }// InteractControllerLocal player) { }
+    public virtual void InteractWith() { }
 }

@@ -5,13 +5,14 @@ using UnityEngine;
 public class OperationItem : InteractItem, IRaycastable
 {
     public OperationAction uniqueOperation;
+    public InteractType awakeInteractType;
     public string interactText;
     public string localizationKey;
 
 
     private void Awake()
     {
-        interactType = InteractType.OperationItem;
+        interactType = awakeInteractType;
     }
 
     public override void InteractWith()//InteractControllerLocal player)

@@ -8,9 +8,11 @@ namespace CallSOS.Player.Interaction
     // Items that are not equipment. Can be dropped or brought back to player ship. Have no utility use.
     public class ResourceItem : InteractItem, IRaycastable
     {
+        public InteractType awakeInteractType;
+
         private void Awake()
         {
-            interactType = InteractType.ResourceItem;
+            interactType = awakeInteractType;
         }
 
         public override void InteractWith()

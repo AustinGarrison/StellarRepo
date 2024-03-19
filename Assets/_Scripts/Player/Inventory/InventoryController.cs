@@ -94,10 +94,16 @@ namespace CallSOS.Player.Interaction
             if (invPanel != null && invPanel.activeSelf)
                 ToggleResourceUI();
 
+            //Toggle Inventory Screen
             GameInputPlayer.Instance.OnResourceHUDToggled += GameInput_OnResourceHUDToggled;
+
+            //Drop held item
             GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
 
+            //Pickup equipment
             interactController.OnEquipmentItemInteract += InteractController_OnHoldItemInteract;
+
+            //Pickup Resource
             interactController.OnResourceItemInteract += InteractController_OnResourceItemInteract;
 
             isInitialized = true;
@@ -163,6 +169,11 @@ namespace CallSOS.Player.Interaction
 
         private void UpdateUISlotHighlights(int currentScrollValue, int previousScrollValue)
         {
+            if (hotbarSlots[currentScrollValue].slot == null)
+            {
+                Debug.LogWarning("Hotbar reference is empty. Check Inspector value");
+            }
+
             if (previousScrollValue != -1) hotbarSlots[previousScrollValue].slot.StartCoroutine("SetNormal");
             hotbarSlots[currentScrollValue].slot.StartCoroutine("SetHighlight");
         }
@@ -441,6 +452,7 @@ namespace CallSOS.Player.Interaction
             drop.name = itemSO.item.name;
             drop.GetComponent<ResourceItem>().itemScriptable.interactText = itemSO.item.interactText;
         }
+
 #endregion
     }
 

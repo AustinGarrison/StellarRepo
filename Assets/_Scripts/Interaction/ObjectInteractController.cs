@@ -1,5 +1,6 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.Interaction.Equipment;
+using FishNet;
 using FishNet.Object;
 using System;
 using UnityEngine;
@@ -33,9 +34,9 @@ namespace CallSOS.Utilities
 
         public class ResourceItemEventArgs : EventArgs
         {
-            public ResourceItem ResourceItem { get; }
+            public NetworkedResourceItem ResourceItem { get; }
 
-            public ResourceItemEventArgs(ResourceItem item)
+            public ResourceItemEventArgs(NetworkedResourceItem item)
             {
                 ResourceItem = item;
             }
@@ -80,7 +81,8 @@ namespace CallSOS.Utilities
 
             if (!isInitialized) return;
             if (InteractWithUI()) return;
-            if (InteractWithComponent3D()) return;
+            //if (InteractWithWorldItem()) return;
+            if (InteractWithNetworkWorldItem()) return;
             CursorController.Instance.SetCursor(CursorType.None);
         }
 
@@ -96,7 +98,8 @@ namespace CallSOS.Utilities
             return false;
         }
 
-        private bool InteractWithComponent3D()
+        /*
+        private bool InteractWithWorldItem()
         {
             RaycastHit[] hits = RaycastAllSorted3D();
 
@@ -110,6 +113,42 @@ namespace CallSOS.Utilities
                         CursorController.Instance.SetCursor(raycastable.GetCursorType());
 
                         InteractItem interactItem = raycastable.GetInteractItem();
+
+
+
+                        if (interactItem != null)
+                        {
+                            SetPickupText(interactItem);
+
+                            if (attemptItemPickup == true)
+                                InteractWithItem(interactItem);
+                        }
+
+                        return true;
+                    }
+                }
+            }
+
+            attemptItemPickup = false;
+            SetPickupText(null);
+            return false;
+        }
+        */
+
+        private bool InteractWithNetworkWorldItem()
+        {
+            RaycastHit[] hits = RaycastAllSorted3D();
+
+            foreach (RaycastHit hit in hits)
+            {
+                INetworkRaycastable[] raycastables = hit.transform.GetComponents<INetworkRaycastable>();
+                foreach (INetworkRaycastable raycastable in raycastables)
+                {
+                    if (raycastable.CanHandleRaycast(this))
+                    {
+                        CursorController.Instance.SetCursor(raycastable.GetCursorType());
+
+                        NetworkedInteractItem interactItem = raycastable.GetInteractItem();
 
                         if (interactItem != null)
                         {
@@ -129,7 +168,7 @@ namespace CallSOS.Utilities
             return false;
         }
 
-        private void SetPickupText(InteractItem interactItem)
+        private void SetPickupText(NetworkedInteractItem interactItem)
         {
             if (interactItem == null)
             {
@@ -140,11 +179,16 @@ namespace CallSOS.Utilities
             string itemInteractTypeText = "";
             InteractType interactType = interactItem.interactType;
 
+
+            Debug.Log(interactType);
+
             switch (interactType)
             {
                 case InteractType.OperationItem:
 
-                    OperationItem operationItem = interactItem.GetComponentInParent<OperationItem>();
+                    NetworkedOperationItem operationItem = interactItem.GetComponentInParent<NetworkedOperationItem>();
+
+                    Debug.Log("Inside Operation");
 
                     if (operationItem != null)
                         itemInteractTypeText = operationItem.localizationKey;
@@ -165,7 +209,8 @@ namespace CallSOS.Utilities
             OnInteractTextEvent?.Invoke(this, new ChangeTextEvent(itemInteractTypeText));
         }
 
-        private void InteractWithItem(InteractItem interactItem)
+        
+        private void InteractWithItem(NetworkedInteractItem interactItem)
         {
             attemptItemPickup = false;
 
@@ -188,7 +233,7 @@ namespace CallSOS.Utilities
             }
         }
 
-        private void InteractWithOperationItem(InteractItem interactItem)
+        private void InteractWithOperationItem(NetworkedInteractItem interactItem)
         {
             IInteractItem operation = interactItem.GetComponent<IInteractItem>();
 
@@ -198,7 +243,7 @@ namespace CallSOS.Utilities
             }
         }
 
-        private void InteractWithHoldItem(InteractItem interactItem)
+        private void InteractWithHoldItem(NetworkedInteractItem interactItem)
         {
             EquipmentItem equipmentItem = interactItem.GetComponent<EquipmentItem>();
 
@@ -213,17 +258,32 @@ namespace CallSOS.Utilities
             }
         }
 
-        private void InteractWithResourceItem(InteractItem interactItem)
+        private void InteractWithResourceItem(NetworkedInteractItem interactItem)
         {
-            ResourceItem resourceItem = interactItem.GetComponent<ResourceItem>();
+            NetworkedResourceItem resourceItem = interactItem.GetComponent<NetworkedResourceItem>();
 
             if (resourceItem != null)
             {
                 OnResourceItemInteract?.Invoke(this, new ResourceItemEventArgs(resourceItem));
                 resourceItem.InteractWith();
+                ResourceItemInteractServerRPC(resourceItem.gameObject);
             }
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        private void ResourceItemInteractServerRPC(GameObject interactItem)
+        {
+            ResourceItemInteractObserverRPC();
+            ServerManager.Despawn(interactItem);
+        }
+
+        [ObserversRpc]
+        private void ResourceItemInteractObserverRPC()
+        {
+            Debug.Log("Interact With");
+        }
+
+        
         RaycastHit[] RaycastAllSorted3D()
         {
             RaycastHit[] hits = Physics.SphereCastAll(GetMouseRay(), raycastRadius);

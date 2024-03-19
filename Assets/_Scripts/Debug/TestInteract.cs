@@ -29,5 +29,4 @@ public class TestInteract : OperationAction
         m_Sounds[n] = m_Sounds[0];
         m_Sounds[0] = m_AudioSource.clip;
     }
-
 }
