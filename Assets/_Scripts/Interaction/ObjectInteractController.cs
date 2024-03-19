@@ -34,9 +34,9 @@ namespace CallSOS.Utilities
 
         public class ResourceItemEventArgs : EventArgs
         {
-            public NetworkedResourceItem ResourceItem { get; }
+            public ResourceItem ResourceItem { get; }
 
-            public ResourceItemEventArgs(NetworkedResourceItem item)
+            public ResourceItemEventArgs(ResourceItem item)
             {
                 ResourceItem = item;
             }
@@ -81,8 +81,7 @@ namespace CallSOS.Utilities
 
             if (!isInitialized) return;
             if (InteractWithUI()) return;
-            //if (InteractWithWorldItem()) return;
-            if (InteractWithNetworkWorldItem()) return;
+            if (InteractWithWorldItem()) return;
             CursorController.Instance.SetCursor(CursorType.None);
         }
 
@@ -97,8 +96,6 @@ namespace CallSOS.Utilities
 
             return false;
         }
-
-        /*
         private bool InteractWithWorldItem()
         {
             RaycastHit[] hits = RaycastAllSorted3D();
@@ -108,48 +105,12 @@ namespace CallSOS.Utilities
                 IRaycastable[] raycastables = hit.transform.GetComponents<IRaycastable>();
                 foreach (IRaycastable raycastable in raycastables)
                 {
-                    if(raycastable.CanHandleRaycast(this))
+                    if (raycastable.CanHandleRaycast(this))
                     {
                         CursorController.Instance.SetCursor(raycastable.GetCursorType());
 
                         InteractItem interactItem = raycastable.GetInteractItem();
 
-
-
-                        if (interactItem != null)
-                        {
-                            SetPickupText(interactItem);
-
-                            if (attemptItemPickup == true)
-                                InteractWithItem(interactItem);
-                        }
-
-                        return true;
-                    }
-                }
-            }
-
-            attemptItemPickup = false;
-            SetPickupText(null);
-            return false;
-        }
-        */
-
-        private bool InteractWithNetworkWorldItem()
-        {
-            RaycastHit[] hits = RaycastAllSorted3D();
-
-            foreach (RaycastHit hit in hits)
-            {
-                INetworkRaycastable[] raycastables = hit.transform.GetComponents<INetworkRaycastable>();
-                foreach (INetworkRaycastable raycastable in raycastables)
-                {
-                    if (raycastable.CanHandleRaycast(this))
-                    {
-                        CursorController.Instance.SetCursor(raycastable.GetCursorType());
-
-                        NetworkedInteractItem interactItem = raycastable.GetInteractItem();
-
                         if (interactItem != null)
                         {
                             SetPickupText(interactItem);
@@ -168,7 +129,7 @@ namespace CallSOS.Utilities
             return false;
         }
 
-        private void SetPickupText(NetworkedInteractItem interactItem)
+        private void SetPickupText(InteractItem interactItem)
         {
             if (interactItem == null)
             {
@@ -179,14 +140,11 @@ namespace CallSOS.Utilities
             string itemInteractTypeText = "";
             InteractType interactType = interactItem.interactType;
 
-
-            Debug.Log(interactType);
-
             switch (interactType)
             {
                 case InteractType.OperationItem:
 
-                    NetworkedOperationItem operationItem = interactItem.GetComponentInParent<NetworkedOperationItem>();
+                    OperationItem operationItem = interactItem.GetComponentInParent<OperationItem>();
 
                     Debug.Log("Inside Operation");
 
@@ -210,7 +168,7 @@ namespace CallSOS.Utilities
         }
 
         
-        private void InteractWithItem(NetworkedInteractItem interactItem)
+        private void InteractWithItem(InteractItem interactItem)
         {
             attemptItemPickup = false;
 
@@ -222,7 +180,7 @@ namespace CallSOS.Utilities
                         InteractWithOperationItem(interactItem);
                         break;
                     case InteractType.HoldItem:
-                        InteractWithHoldItem(interactItem);
+                        InteractWithEquipmentItem(interactItem);
                         break;
                     case InteractType.ResourceItem:
                         InteractWithResourceItem(interactItem);
@@ -233,7 +191,7 @@ namespace CallSOS.Utilities
             }
         }
 
-        private void InteractWithOperationItem(NetworkedInteractItem interactItem)
+        private void InteractWithOperationItem(InteractItem interactItem)
         {
             IInteractItem operation = interactItem.GetComponent<IInteractItem>();
 
@@ -243,46 +201,35 @@ namespace CallSOS.Utilities
             }
         }
 
-        private void InteractWithHoldItem(NetworkedInteractItem interactItem)
+        private void InteractWithEquipmentItem(InteractItem interactItem)
         {
             EquipmentItem equipmentItem = interactItem.GetComponent<EquipmentItem>();
 
             if (equipmentItem != null)
             {
-                equipmentItem.InteractWith();
                 OnEquipmentItemInteract?.Invoke(this, new EquipmentItemEventArgs(equipmentItem));
+                equipmentItem.InteractWith();
             }
             else
             {
-                Debug.LogWarning("Failed to get hold Item");
+                Debug.LogWarning("Failed to get Equipment Item");
             }
         }
 
-        private void InteractWithResourceItem(NetworkedInteractItem interactItem)
+        private void InteractWithResourceItem(InteractItem interactItem)
         {
-            NetworkedResourceItem resourceItem = interactItem.GetComponent<NetworkedResourceItem>();
+            ResourceItem resourceItem = interactItem.GetComponent<ResourceItem>();
 
             if (resourceItem != null)
             {
                 OnResourceItemInteract?.Invoke(this, new ResourceItemEventArgs(resourceItem));
                 resourceItem.InteractWith();
-                ResourceItemInteractServerRPC(resourceItem.gameObject);
+            }
+            else
+            {
+                Debug.LogWarning("Failed to get Resource Item");
             }
         }
-
-        [ServerRpc(RequireOwnership = false)]
-        private void ResourceItemInteractServerRPC(GameObject interactItem)
-        {
-            ResourceItemInteractObserverRPC();
-            ServerManager.Despawn(interactItem);
-        }
-
-        [ObserversRpc]
-        private void ResourceItemInteractObserverRPC()
-        {
-            Debug.Log("Interact With");
-        }
-
         
         RaycastHit[] RaycastAllSorted3D()
         {

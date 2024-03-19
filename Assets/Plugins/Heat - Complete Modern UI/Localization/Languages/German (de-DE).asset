@@ -793,3 +793,7 @@ MonoBehaviour:
       value: Inventar
       audioValue: {fileID: 0}
       spriteValue: {fileID: 0}
+    - key: MoveSquare
+      value: Move Square
+      audioValue: {fileID: 0}
+      spriteValue: {fileID: 0}

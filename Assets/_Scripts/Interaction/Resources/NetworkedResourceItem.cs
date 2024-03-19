@@ -1,40 +1,33 @@
-using CallSOS.Player.Interaction;
-using CallSOS.Utilities;
 using FishNet;
-using System.Collections;
-using System.Collections.Generic;
+using FishNet.Object;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace CallSOS.Player.Interaction
 {
-    public class NetworkedResourceItem : NetworkedInteractItem, INetworkRaycastable
+    public class NetworkedResourceItem : NetworkedInteractItem
     {
-        public InteractType awakeInteractType;
-
-        private void Awake()
+        public override void NetworkInteractWith()
         {
-            interactType = awakeInteractType;
+            ResourceItemInteractServerRPC();
         }
 
-        public override void InteractWith()
+        [ServerRpc(RequireOwnership = false)]
+        private void ResourceItemInteractServerRPC()
         {
-            Debug.Log("NetworkInteractWith");
-            //Destroy(gameObject);
+            ResourceItemInteractObserverRPC();
+            ServerManager.Despawn(gameObject);
         }
 
-        public bool CanHandleRaycast(ObjectInteractController callingController)
+        [ObserversRpc]
+        private void ResourceItemInteractObserverRPC()
         {
-            return true;
+            Debug.Log("Interact With");
         }
 
-        public CursorType GetCursorType()
+        public override void SpawnItem(GameObject item)
         {
-            return CursorType.Grab;
-        }
+        }       
 
-        public NetworkedInteractItem GetInteractItem()
-        {
-            return GetComponent<NetworkedInteractItem>();
-        }
     }
 }

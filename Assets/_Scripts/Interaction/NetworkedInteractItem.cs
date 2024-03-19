@@ -1,9 +1,11 @@
+using FishNet.Object;
 using UnityEngine;
 
-public class NetworkedInteractItem : MonoBehaviour, IInteractItem
+namespace CallSOS.Player.Interaction
 {
-    public ItemSO itemScriptable;
-    [HideInInspector] public InteractType interactType;
-
-    public virtual void InteractWith() { }
+    public class NetworkedInteractItem : NetworkBehaviour
+    {
+        public virtual void NetworkInteractWith() { }
+        public virtual void SpawnItem(GameObject item) { }
+    }
 }

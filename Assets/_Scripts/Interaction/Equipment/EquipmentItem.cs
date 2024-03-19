@@ -14,6 +14,10 @@ namespace CallSOS.Player.Interaction.Equipment
         public bool isInHand ;
         public bool debugOffest = false;
 
+        [Space(5)]
+        public bool isNetworked;
+        [SerializeField] internal NetworkedInteractItem networkedEquipment;
+
         internal EquipmentActions action;
 
         internal string mainActionText;
@@ -66,7 +70,10 @@ namespace CallSOS.Player.Interaction.Equipment
 
         public override void InteractWith()//InteractControllerLocal player)
         {
-            Debug.Log("HoldItem/InteractWith");
+            Debug.Log("EquipmentItem/InteractWith");
+
+            if (isNetworked && networkedEquipment != null)
+                networkedEquipment.NetworkInteractWith();
         }
 
         public CursorType GetCursorType()

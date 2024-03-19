@@ -10,7 +10,7 @@ using CallSOS.Player.Interaction;
 using CallSOS.Utilities;
 
 //Made by Bobsi Unity - for Youtube
-public class CubeAudioBroadcast : MonoBehaviour, IRaycastable
+public class CubeAudioBroadcast : OperationAction, IRaycastable
 {
     public List<Transform> cubePositions = new List<Transform>();
     public int transformIndex;

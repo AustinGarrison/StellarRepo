@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using System;
 using TMPro;
+using FishNet;
 
 namespace CallSOS.Player.Interaction
 {
@@ -83,7 +84,7 @@ namespace CallSOS.Player.Interaction
 
         private void InteractController_OnResourceItemInteract(object sender, ObjectInteractController.ResourceItemEventArgs e)
         {
-            AddResource(e.ResourceItem.itemScriptable);
+            AddResource(e.ResourceItem);
         }
 
         #endregion
@@ -190,8 +191,8 @@ namespace CallSOS.Player.Interaction
                 return;
             }
 
-            // Is item one or two handed
-            if(item.handType == EquipmentItemHandType.OneHanded)
+            // Item clicked is a One handed item
+            if (item.handType == EquipmentItemHandType.OneHanded)
             {
                 // Currently Selected slot is open, and not two handed slot
                 if (hotbarSlots[currentScrollValue].heldItem == null && currentScrollValue != twoHandedSlot)
@@ -202,12 +203,10 @@ namespace CallSOS.Player.Interaction
                 }
                 else
                 {
-
                     bool hasFoundSlot = false;
 
                     // Loop through all slots to find first open
                     hasFoundSlot = FindFirstSlot(item, hasFoundSlot);
-
 
                     // No Slot Found
                     if (!hasFoundSlot)
@@ -219,6 +218,7 @@ namespace CallSOS.Player.Interaction
                 }
             }
 
+            // Item clicked is a two handed item
             if (item.handType == EquipmentItemHandType.TwoHanded)
             {
                 if (hotbarSlots[twoHandedSlot].heldItem == null)
@@ -377,7 +377,7 @@ namespace CallSOS.Player.Interaction
             {
                 GameObject obj = Instantiate(UIInvObjectPrefab, UIinvObjectHolder);
                 obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = inventoryObject.item.itemName + " - " + inventoryObject.amount;
-                obj.GetComponent<Button>().onClick.AddListener(delegate { DropResourceItem(inventoryObject.item); });
+                obj.GetComponent<Button>().onClick.AddListener(delegate { DropOneResourceItem(inventoryObject.item); });
             }
         }
 
@@ -407,27 +407,29 @@ namespace CallSOS.Player.Interaction
             }
         }
 
-        internal void AddResource(ItemSO newItem)
+        internal void AddResource(ResourceItem newItem)
         {
             foreach (ResourceObject inventoryObject in resourceObjects)
             {
-                if (inventoryObject.item == newItem)
+                if (inventoryObject.item == newItem.itemScriptable)
                 {
                     inventoryObject.amount++;
+                    inventoryObject.isNetworked = newItem.isNetworked;
                     return;
                 }
             }
 
-            resourceObjects.Add(new ResourceObject() { item = newItem, amount = 1 });
+            resourceObjects.Add(new ResourceObject() { item = newItem.itemScriptable, amount = 1, isNetworked = newItem.isNetworked});
         }
 
-        void DropResourceItem(ItemSO item)
+        void DropOneResourceItem(ItemSO item)
         {
             foreach (ResourceObject resourceObject in resourceObjects)
             {
                 if (resourceObject.item != item)
                     continue;
 
+                // If there is more than one item, only drop one from the list
                 if (resourceObject.amount > 1)
                 {
                     resourceObject.amount--;
@@ -436,6 +438,7 @@ namespace CallSOS.Player.Interaction
                     return;
                 }
 
+                // If there is only one item left, remove it from the inventory list.
                 if (resourceObject.amount <= 1)
                 {
                     resourceObjects.Remove(resourceObject);
@@ -448,9 +451,42 @@ namespace CallSOS.Player.Interaction
 
         void DropResource(ResourceObject itemSO, Vector3 position)
         {
-            GameObject drop = Instantiate(itemSO.item.prefab, position, Quaternion.identity, worldHeldItemParent);
-            drop.name = itemSO.item.name;
-            drop.GetComponent<ResourceItem>().itemScriptable.interactText = itemSO.item.interactText;
+            if (itemSO.isNetworked)
+            {
+                DropResourceServerRpc(itemSO, position);
+            }
+            else
+            {
+                GameObject drop = Instantiate(itemSO.item.prefab, position, Quaternion.identity, worldHeldItemParent);
+                drop.name = itemSO.item.name;
+
+                ResourceItem resourceItem = drop.GetComponent<ResourceItem>();
+
+                if (resourceItem != null)
+                {
+                    resourceItem.itemScriptable.interactText = itemSO.item.interactText;
+                }
+            }
+        }
+
+
+        [ServerRpc]
+        void DropResourceServerRpc(ResourceObject itemSO, Vector3 position)
+        {
+            GameObject drop = Instantiate(itemSO.item.prefab, position, Quaternion.identity);
+
+            ServerManager.Spawn(drop);
+
+
+            ResourceItem resourceItem = drop.GetComponent<ResourceItem>();
+
+            if (resourceItem != null)
+            {
+                resourceItem.itemScriptable.interactText = itemSO.item.interactText;
+            }
+
+
+            drop.name = "P9ink:";
         }
 
 #endregion
@@ -461,5 +497,6 @@ namespace CallSOS.Player.Interaction
     {
         public ItemSO item;
         public int amount;
+        public bool isNetworked;
     }
 }

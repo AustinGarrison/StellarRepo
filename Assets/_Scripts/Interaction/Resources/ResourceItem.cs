@@ -1,4 +1,6 @@
 using CallSOS.Utilities;
+using FishNet.Managing.Server;
+using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +12,10 @@ namespace CallSOS.Player.Interaction
     {
         public InteractType awakeInteractType;
 
+        public int amount;
+        public bool isNetworked;
+        [SerializeField] internal NetworkedInteractItem networkedResource;
+
         private void Awake()
         {
             interactType = awakeInteractType;
@@ -20,8 +26,8 @@ namespace CallSOS.Player.Interaction
             //base.InteractWith(); // Doesnt spawn player when active?
             Debug.Log("InventoryItem/InteractWith");
 
-            // Despawn Object
-            Destroy(gameObject);
+            if(isNetworked && networkedResource != null)
+                networkedResource.NetworkInteractWith();
         }
 
         public CursorType GetCursorType()
@@ -38,5 +44,6 @@ namespace CallSOS.Player.Interaction
         {
             return GetComponent<InteractItem>();
         }
+
     }
 }
