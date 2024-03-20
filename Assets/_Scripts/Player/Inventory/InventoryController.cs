@@ -1,13 +1,12 @@
 using CallSOS.Player.Interaction.Equipment;
-using System.Collections.Generic;
-using System.Collections;
 using CallSOS.Utilities;
 using FishNet.Object;
-using UnityEngine.UI;
-using UnityEngine;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
-using FishNet;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace CallSOS.Player.Interaction
 {
@@ -22,7 +21,10 @@ namespace CallSOS.Player.Interaction
         [SerializeField] internal Transform worldHeldItemParent;
         [SerializeField] private ObjectInteractController interactController;
 
-        [SerializeField] private Transform holdPostion;
+        // Where equipment positions should go
+        [SerializeField] private Transform holdPosition;
+        // Parent of equipment. Topmost player gameobject, because its the NetworkObject
+        [SerializeField] private Transform holdParent;
 
         [Header("HUD")]
         [SerializeField] private GameObject crosshair;
@@ -74,10 +76,11 @@ namespace CallSOS.Player.Interaction
 
         private void GameInput_OnAltInteractAction(object sender, EventArgs e)
         {
-            DropHeldItem();
+            if (objectInHand != null)
+                DropEquipmentItem();
         }
 
-        private void InteractController_OnHoldItemInteract(object sender, ObjectInteractController.EquipmentItemEventArgs e)
+        private void InteractController_OnEquipmentItemInteract(object sender, ObjectInteractController.EquipmentItemEventArgs e)
         {
             FindEmptyHotbarSlot(e.EquipmentItem);
         }
@@ -102,7 +105,7 @@ namespace CallSOS.Player.Interaction
             GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
 
             //Pickup equipment
-            interactController.OnEquipmentItemInteract += InteractController_OnHoldItemInteract;
+            interactController.OnEquipmentItemInteract += InteractController_OnEquipmentItemInteract;
 
             //Pickup Resource
             interactController.OnResourceItemInteract += InteractController_OnResourceItemInteract;
@@ -116,7 +119,7 @@ namespace CallSOS.Player.Interaction
             GameInputPlayer.Instance.OnResourceHUDToggled -= GameInput_OnResourceHUDToggled;
             GameInputPlayer.Instance.OnAltInteractAction -= GameInput_OnAltInteractAction;
 
-            interactController.OnEquipmentItemInteract -= InteractController_OnHoldItemInteract;
+            interactController.OnEquipmentItemInteract -= InteractController_OnEquipmentItemInteract;
             interactController.OnResourceItemInteract -= InteractController_OnResourceItemInteract;
         }
 
@@ -185,7 +188,7 @@ namespace CallSOS.Player.Interaction
         /// </summary>
         internal void FindEmptyHotbarSlot(EquipmentItem item)
         {
-            if (holdPostion == null)
+            if (holdPosition == null)
             {
                 Debug.LogError("No hold position found");
                 return;
@@ -274,7 +277,7 @@ namespace CallSOS.Player.Interaction
 
             UpdateUISlotHighlights(hotbarSlot, previousScrollValue);
 
-            PickupHeldItem(item);
+            PickupEquipmentItem(item);
         }
 
         /// <summary>
@@ -309,32 +312,40 @@ namespace CallSOS.Player.Interaction
         /// <summary>
         /// Move item from world to players hand
         /// </summary>
-        private void PickupHeldItem(EquipmentItem equipmentItem)
+        private void PickupEquipmentItem(EquipmentItem equipmentItem)
         {
-            equipmentItem.transform.SetParent(holdPostion);
-            equipmentItem.transform.position = Vector3.zero;
-            equipmentItem.transform.localPosition = equipmentItem.GetComponent<EquipmentItem>().holdPositionOffset;
-            equipmentItem.transform.rotation = holdPostion.rotation;
+            if (equipmentItem.isNetworked)
+            {
+                equipmentItem.networkedEquipment.NetworkedEquipmentInteractWith(holdParent, holdPosition, equipmentItem);
 
-            equipmentItem.isInInventory = true;
+                objectInHand = equipmentItem;
+            }
+            else
+            {
+                equipmentItem.transform.SetParent(holdParent);
+                equipmentItem.transform.position = Vector3.zero;
+                equipmentItem.transform.localPosition = equipmentItem.holdPositionOffset;
+                equipmentItem.transform.rotation = holdPosition.rotation;
 
-            if (equipmentItem.GetComponent<Rigidbody>() != null)
-                equipmentItem.GetComponent<Rigidbody>().isKinematic = true;
+                equipmentItem.isInInventory = true;
 
-            if (equipmentItem.GetComponent<Collider>() != null)
-                equipmentItem.GetComponent<Collider>().enabled = false;
+                if (equipmentItem.GetComponent<Rigidbody>() != null)
+                    equipmentItem.GetComponent<Rigidbody>().isKinematic = true;
 
-            objectInHand = equipmentItem;
-            objectInHand.action.UpdateIsInHand(true);
+                if (equipmentItem.GetComponent<Collider>() != null)
+                    equipmentItem.GetComponent<Collider>().enabled = false;
+
+                objectInHand = equipmentItem;
+
+                equipmentItem.action.UpdateIsInHand(true);
+            }
         }
 
         /// <summary>
         /// Remove held item from hotbar and set it back to the world
         /// </summary>
-        internal void DropHeldItem()
+        internal void DropEquipmentItem()
         {
-            if (objectInHand == null) return;
-
             EquipmentItem equipmentItem = hotbarSlots[currentScrollValue].heldItem;
 
             if (equipmentItem == null)
@@ -343,20 +354,29 @@ namespace CallSOS.Player.Interaction
                 return;
             }
 
-            hotbarSlots[currentScrollValue].heldItem = null;
-            hotbarSlots[currentScrollValue].slot.DisableSlotIcons();
+            if (equipmentItem.isNetworked)
+            {
 
-            equipmentItem.transform.parent = worldHeldItemParent;
-            equipmentItem.isInInventory = false;
+            }
+            else
+            {
+                hotbarSlots[currentScrollValue].heldItem = null;
+                hotbarSlots[currentScrollValue].slot.DisableSlotIcons();
 
-            if (equipmentItem.GetComponent<Rigidbody>() != null)
-                equipmentItem.GetComponent<Rigidbody>().isKinematic = false;
+                equipmentItem.transform.parent = worldHeldItemParent;
+                equipmentItem.isInInventory = false;
 
-            if (equipmentItem.GetComponent<Collider>() != null)
-                equipmentItem.GetComponent<Collider>().enabled = true;
+                if (equipmentItem.GetComponent<Rigidbody>() != null)
+                    equipmentItem.GetComponent<Rigidbody>().isKinematic = false;
 
-            objectInHand.action.UpdateIsInHand(false);
-            objectInHand = null;
+                if (equipmentItem.GetComponent<Collider>() != null)
+                    equipmentItem.GetComponent<Collider>().enabled = true;
+
+                objectInHand.action.UpdateIsInHand(false);
+                objectInHand = null;
+            }
+            
+
         }
 
         IEnumerator ScrollCooldownTimer()
@@ -485,11 +505,11 @@ namespace CallSOS.Player.Interaction
                 resourceItem.itemScriptable.interactText = itemSO.item.interactText;
             }
 
-
-            drop.name = "P9ink:";
+            drop.name = "Pink:";
         }
 
 #endregion
+
     }
 
     [System.Serializable]
