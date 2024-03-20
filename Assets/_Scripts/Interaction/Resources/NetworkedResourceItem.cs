@@ -7,7 +7,7 @@ namespace CallSOS.Player.Interaction
 {
     public class NetworkedResourceItem : NetworkedInteractItem
     {
-        public override void NetworkInteractWith()
+        public override void NetworkedInteractWith()
         {
             ResourceItemInteractServerRPC();
         }

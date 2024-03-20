@@ -27,7 +27,7 @@ namespace CallSOS.Player.Interaction
             Debug.Log("InventoryItem/InteractWith");
 
             if(isNetworked && networkedResource != null)
-                networkedResource.NetworkInteractWith();
+                networkedResource.NetworkedInteractWith();
         }
 
         public CursorType GetCursorType()

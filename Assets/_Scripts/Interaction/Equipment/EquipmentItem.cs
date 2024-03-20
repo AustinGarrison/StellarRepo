@@ -50,7 +50,6 @@ namespace CallSOS.Player.Interaction.Equipment
             }
         }
 
-
         private string GetKeyDictionary(InputAction mainInputAction)
         {
             string bindingPath = mainInputAction.bindings[0].path;
@@ -73,7 +72,7 @@ namespace CallSOS.Player.Interaction.Equipment
             Debug.Log("EquipmentItem/InteractWith");
 
             if (isNetworked && networkedEquipment != null)
-                networkedEquipment.NetworkInteractWith();
+                networkedEquipment.NetworkedInteractWith();
         }
 
         public CursorType GetCursorType()
