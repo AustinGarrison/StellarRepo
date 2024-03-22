@@ -185,9 +185,10 @@ namespace CallSOS.Player
 
         #endregion
 
-
+        
         private void Update()
         {
+            if (!base.IsOwner) return;
             if (!isInitialized) return;
             if (isPaused)
             {
@@ -206,6 +207,7 @@ namespace CallSOS.Player
                 playerSound.ProcessStepCycle(_footstepRate, CurrentPlayerState);
         }
 
+        
 
         public void HandleMovement()
         {

@@ -1,9 +1,8 @@
 using System;
 using UnityEngine;
 using FishNet.Object;
-using Unity.VisualScripting;
 
-public class GameInputPlayer : NetworkBehaviour
+public class GameInputPlayer : MonoBehaviour
 {
     public static GameInputPlayer Instance { get; private set; }
 
@@ -118,23 +117,21 @@ public class GameInputPlayer : NetworkBehaviour
         return input;
     }
 
-    public override void OnStopClient()
+    private void OnDisable()
     {
-        base.OnStopClient();
-        if (base.IsOwner)
-        {
-            playerInputActions.Player.Jump.performed -= Jump_performed;
-            playerInputActions.Player.Interact.performed -= Interact_performed;
-            playerInputActions.Player.AltInteract.performed -= Interact_performed;
-            playerInputActions.Player.Crouch.performed -= Crouch_performed;
-            playerInputActions.Player.Crouch.canceled -= Crouch_canceled;
-            playerInputActions.Player.InventoryToggle.performed -= InventoryToggle_performed;
-            playerInputActions.Player.Sprint.performed -= Sprint_performed;
-            playerInputActions.Player.Sprint.canceled -= Sprint_canceled;
-            playerInputActions.Player.Click.performed -= Click_performed;
 
-            playerInputActions.Dispose();
-        }
+        playerInputActions.Player.Jump.performed -= Jump_performed;
+        playerInputActions.Player.Interact.performed -= Interact_performed;
+        playerInputActions.Player.AltInteract.performed -= Interact_performed;
+        playerInputActions.Player.Crouch.performed -= Crouch_performed;
+        playerInputActions.Player.Crouch.canceled -= Crouch_canceled;
+        playerInputActions.Player.InventoryToggle.performed -= InventoryToggle_performed;
+        playerInputActions.Player.Sprint.performed -= Sprint_performed;
+        playerInputActions.Player.Sprint.canceled -= Sprint_canceled;
+        playerInputActions.Player.Click.performed -= Click_performed;
+
+        playerInputActions.Dispose();
+        
     }
 
     public Vector2 GetMovementVectorNormalized()

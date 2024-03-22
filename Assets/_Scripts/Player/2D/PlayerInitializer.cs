@@ -5,20 +5,29 @@ using CallSOS.Utilities;
 using Michsky.UI.Heat;
 using FishNet.Object;
 using UnityEngine;
+using Cinemachine;
 
 namespace CallSOS.Player
 {
+    [DefaultExecutionOrder(-100)]
     public class PlayerInitializer : NetworkBehaviour
     {
         [SerializeField] private NetworkedTopDownPlayerController playerController;
-        [SerializeField] private ObjectInteractController interactController;
         [SerializeField] private InventoryController inventoryController;
-        [SerializeField] private PlayerSoundManager playerSound;
-        [SerializeField] private PlayerHudManager hudManager;
-        [SerializeField] private GameInputPlayer playerInput;
         [SerializeField] private AudioListener audioListener;
+        [SerializeField] private CursorCameraTarget cameraTarget;
         [SerializeField] private GameObject PauseMenuPrefab;
         [SerializeField] private GameObject PlayerMesh;
+        [SerializeField] private GameObject playerExtrasPrefab;
+
+        private Camera playerCamera;
+        private CinemachineVirtualCamera virtualCamera;
+
+        private PlayerExtraSpawner extraSpawner;
+        private ObjectInteractController interactController;
+        private PlayerSoundManager soundManager;
+        private PlayerHudManager hudManager;
+        private GameInputPlayer playerInput;
 
         public override void OnStartClient()
         {
@@ -40,6 +49,25 @@ namespace CallSOS.Player
 
         private void Initialize()
         {
+
+            GameObject playerExtrasGameObject = Instantiate(playerExtrasPrefab);
+            extraSpawner = playerExtrasGameObject.GetComponent<PlayerExtraSpawner>();
+
+            if (extraSpawner != null)
+            {
+                interactController = extraSpawner.interactController;
+                soundManager = extraSpawner.soundManager;
+                hudManager = extraSpawner.hudManager;
+                playerInput = extraSpawner.playerInput;
+                playerCamera = extraSpawner.playerCamera;
+                virtualCamera = extraSpawner.virtualCamera;
+            }
+
+            Destroy(extraSpawner);
+
+            cameraTarget.playerCamera = playerCamera;
+            virtualCamera.Follow = cameraTarget.transform;
+
             playerInput.Initialize();
 
             GameObject pauseMenu = Instantiate(PauseMenuPrefab);
@@ -47,20 +75,25 @@ namespace CallSOS.Player
 
             if (interactController != null) interactController.Initialize();
 
+            inventoryController.interactController = interactController;
             inventoryController.enabled = true;
             if (inventoryController != null) inventoryController.Initialize();
 
-            if (playerSound != null) playerSound.Init();
+            if (soundManager != null) soundManager.Init();
 
             if (audioListener != null) audioListener.enabled = true;
 
             if (hudManager != null)
             {
+                inventoryController.hotbarSlots = hudManager.hotbarSlots;
+                hudManager.topDownPlayerController = playerController;
+                hudManager.inventoryController = inventoryController;
                 hudManager.enabled = true;
                 hudManager.Initialize();
             }
 
             Destroy(this);
         }
+
     }
 }

@@ -131,8 +131,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemScriptable: {fileID: 0}
   interactType: 0
-  uniqueOperation: {fileID: 4192773387529919004}
+  localOperation: {fileID: 0}
+  networkOperation: {fileID: 0}
+  awakeInteractType: 0
   interactText: Release
+  localizationKey: 
 --- !u!82 &4192773387529919007
 AudioSource:
   m_ObjectHideFlags: 0
@@ -241,6 +244,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35fe808b98fbb0b4b9c8f90e510b7d07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
   testInteractAction:
     m_PersistentCalls:
       m_Calls:

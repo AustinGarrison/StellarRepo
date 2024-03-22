@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 
 namespace CallSOS.Utilities
 {
-    public class ObjectInteractController : NetworkBehaviour
+    public class ObjectInteractController : MonoBehaviour
     {      
         [SerializeField] float raycastRadius = 1f;
 
@@ -73,12 +73,6 @@ namespace CallSOS.Utilities
 
         private void Update()
         {
-            if (!base.IsOwner)
-            {
-                enabled = false;
-                return;
-            }
-
             if (!isInitialized) return;
             if (InteractWithUI()) return;
             if (InteractWithWorldItem()) return;
@@ -145,8 +139,6 @@ namespace CallSOS.Utilities
                 case InteractType.OperationItem:
 
                     OperationItem operationItem = interactItem.GetComponentInParent<OperationItem>();
-
-                    Debug.Log("Inside Operation");
 
                     if (operationItem != null)
                         itemInteractTypeText = operationItem.localizationKey;

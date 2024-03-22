@@ -5,13 +5,19 @@ namespace CallSOS.Utilities
 {
     public class CursorCameraTarget : NetworkBehaviour
     {
-        [SerializeField] Camera playerCamera;
+        [SerializeField] internal Camera playerCamera;
         [SerializeField] Transform player;
         [SerializeField] float threshold;
         [SerializeField] float minSpeed;
         [SerializeField] float maxSpeed;
 
         [SerializeField] float speedByDistance = 0f;
+
+        public override void OnStartClient()
+        {
+            if(!base.IsOwner) return;
+        }
+
 
         void Update()
         {
@@ -40,5 +46,6 @@ namespace CallSOS.Utilities
 
             transform.position = newPosition;
         }
+
     }
 }

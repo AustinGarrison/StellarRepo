@@ -5,15 +5,17 @@ using FishNet.Object;
 using Michsky.UI.Heat;
 using TMPro;
 using UnityEngine;
+using static CallSOS.Player.Interaction.InventoryController;
 
 namespace CallSOS.Player.UI
 {
-    public class PlayerHudManager : NetworkBehaviour
+    public class PlayerHudManager : MonoBehaviour
     {
-        [SerializeField] private NetworkedTopDownPlayerController topDownPlayerController;
+        internal NetworkedTopDownPlayerController topDownPlayerController;
+        internal InventoryController inventoryController;
         [SerializeField] private ObjectInteractController interactController;
-        [SerializeField] private InventoryController inventoryController;
         [SerializeField] private ProgressBar staminaBar;
+        public InventorySlotInfo[] hotbarSlots = new InventorySlotInfo[0];
 
         [SerializeField] private string interactKeyText;
         
@@ -44,11 +46,6 @@ namespace CallSOS.Player.UI
 
         private void Update()
         {
-            if (!base.IsOwner)
-            {
-                return;
-            }
-
             UpdateCursorTextPosition();
         }
 
@@ -105,7 +102,6 @@ namespace CallSOS.Player.UI
 
         private void FixedUpdate()
         {
-            //float sprintTimer = playerController._timeSinceSprintStarted / playerController.MaxSprintDuration;
             float sprintTimer = topDownPlayerController._timeSinceSprintStarted / topDownPlayerController.MaxSprintDuration;
             float remainingSprint = Mathf.Lerp(startingStaminaValue, depleatedStaminaValue, sprintTimer);
 

@@ -19,7 +19,7 @@ namespace CallSOS.Player.Interaction
     public class InventoryController : NetworkBehaviour
     {
         [SerializeField] internal Transform worldHeldItemParent;
-        [SerializeField] private ObjectInteractController interactController;
+        [SerializeField] internal ObjectInteractController interactController;
 
         // Where equipment positions should go
         [SerializeField] private Transform holdPosition;
@@ -268,6 +268,7 @@ namespace CallSOS.Player.Interaction
         private void AddItemToFoundSlot(int hotbarSlot, EquipmentItem item)
         {
             hotbarSlots[hotbarSlot].heldItem = item;
+            // Get Hud
             hotbarSlots[hotbarSlot].slot.UpdateSlotIcons(item.iconImage);
 
             int previousScrollValue = currentScrollValue;

@@ -32,8 +32,9 @@ namespace CallSOS.Player.Interaction
         [ObserversRpc]
         private void EquipmentPickupObserversRpc(Transform holdParent, Transform holdPosition, Vector3 offset)
         {
+
             transform.SetParent(holdParent);
-            //transform.parent = holdParent;
+            transform.parent = holdParent;
             transform.position = Vector3.zero;
             transform.localPosition = offset;
             //transform.rotation = holdPosition.rotation;
