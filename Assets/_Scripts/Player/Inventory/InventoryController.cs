@@ -1,11 +1,12 @@
 using CallSOS.Player.Interaction.Equipment;
-using System.Collections.Generic;
-using System.Collections;
-using UnityEngine.UI;
-using UnityEngine;
-using System;
-using TMPro;
 using CallSOS.Utilities;
+using FishNet.Object;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace CallSOS.Player.Interaction
 {
@@ -15,18 +16,21 @@ namespace CallSOS.Player.Interaction
         TwoHanded
     }
 
-    public class InventoryController : MonoBehaviour
+    public class InventoryController : NetworkBehaviour
     {
         [SerializeField] internal Transform worldHeldItemParent;
-        [SerializeField] private ObjectInteractController interactController;
+        [SerializeField] internal ObjectInteractController interactController;
 
-        [SerializeField] private Transform holdPostion;
+        // Where equipment positions should go
+        [SerializeField] private Transform holdPosition;
+        // Parent of equipment. Topmost player gameobject, because its the NetworkObject
+        [SerializeField] private Transform holdParent;
 
         [Header("HUD")]
         [SerializeField] private GameObject crosshair;
         [SerializeField] private GameObject UIInvObjectPrefab;
-        [SerializeField] private GameObject invPanel;
-        [SerializeField] private Transform UIinvObjectHolder;
+        [SerializeField] internal GameObject invPanelBackground;
+        [SerializeField] internal Transform UIInvObjectHolder;
 
         [Header("Resource and Equipment Holders")]
         public List<ResourceObject> resourceObjects = new List<ResourceObject>();
@@ -72,17 +76,18 @@ namespace CallSOS.Player.Interaction
 
         private void GameInput_OnAltInteractAction(object sender, EventArgs e)
         {
-            DropHeldItem();
+            if (objectInHand != null)
+                DropEquipmentItem();
         }
 
-        private void InteractController_OnHoldItemInteract(object sender, ObjectInteractController.EquipmentItemEventArgs e)
+        private void InteractController_OnEquipmentItemInteract(object sender, ObjectInteractController.EquipmentItemEventArgs e)
         {
             FindEmptyHotbarSlot(e.EquipmentItem);
         }
 
         private void InteractController_OnResourceItemInteract(object sender, ObjectInteractController.ResourceItemEventArgs e)
         {
-            AddResource(e.ResourceItem.itemScriptable);
+            AddResource(e.ResourceItem);
         }
 
         #endregion
@@ -90,24 +95,31 @@ namespace CallSOS.Player.Interaction
         internal void Initialize()
         {
             //Turns off inventory if its on
-            if (invPanel != null && invPanel.activeSelf)
+            if (invPanelBackground != null && invPanelBackground.activeSelf)
                 ToggleResourceUI();
 
+            //Toggle Inventory Screen
             GameInputPlayer.Instance.OnResourceHUDToggled += GameInput_OnResourceHUDToggled;
+
+            //Drop held item
             GameInputPlayer.Instance.OnAltInteractAction += GameInput_OnAltInteractAction;
 
-            interactController.OnEquipmentItemInteract += InteractController_OnHoldItemInteract;
+            //Pickup equipment
+            interactController.OnEquipmentItemInteract += InteractController_OnEquipmentItemInteract;
+
+            //Pickup Resource
             interactController.OnResourceItemInteract += InteractController_OnResourceItemInteract;
 
             isInitialized = true;
         }
 
-        private void OnDisable()
+        public override void OnStopClient()
         {
+            base.OnStopClient();
             GameInputPlayer.Instance.OnResourceHUDToggled -= GameInput_OnResourceHUDToggled;
             GameInputPlayer.Instance.OnAltInteractAction -= GameInput_OnAltInteractAction;
 
-            interactController.OnEquipmentItemInteract -= InteractController_OnHoldItemInteract;
+            interactController.OnEquipmentItemInteract -= InteractController_OnEquipmentItemInteract;
             interactController.OnResourceItemInteract -= InteractController_OnResourceItemInteract;
         }
 
@@ -161,6 +173,11 @@ namespace CallSOS.Player.Interaction
 
         private void UpdateUISlotHighlights(int currentScrollValue, int previousScrollValue)
         {
+            if (hotbarSlots[currentScrollValue].slot == null)
+            {
+                Debug.LogWarning("Hotbar reference is empty. Check Inspector value");
+            }
+
             if (previousScrollValue != -1) hotbarSlots[previousScrollValue].slot.StartCoroutine("SetNormal");
             hotbarSlots[currentScrollValue].slot.StartCoroutine("SetHighlight");
         }
@@ -171,14 +188,14 @@ namespace CallSOS.Player.Interaction
         /// </summary>
         internal void FindEmptyHotbarSlot(EquipmentItem item)
         {
-            if (holdPostion == null)
+            if (holdPosition == null)
             {
                 Debug.LogError("No hold position found");
                 return;
             }
 
-            // Is item one or two handed
-            if(item.handType == EquipmentItemHandType.OneHanded)
+            // Item clicked is a One handed item
+            if (item.handType == EquipmentItemHandType.OneHanded)
             {
                 // Currently Selected slot is open, and not two handed slot
                 if (hotbarSlots[currentScrollValue].heldItem == null && currentScrollValue != twoHandedSlot)
@@ -189,12 +206,10 @@ namespace CallSOS.Player.Interaction
                 }
                 else
                 {
-
                     bool hasFoundSlot = false;
 
                     // Loop through all slots to find first open
                     hasFoundSlot = FindFirstSlot(item, hasFoundSlot);
-
 
                     // No Slot Found
                     if (!hasFoundSlot)
@@ -206,6 +221,7 @@ namespace CallSOS.Player.Interaction
                 }
             }
 
+            // Item clicked is a two handed item
             if (item.handType == EquipmentItemHandType.TwoHanded)
             {
                 if (hotbarSlots[twoHandedSlot].heldItem == null)
@@ -252,6 +268,7 @@ namespace CallSOS.Player.Interaction
         private void AddItemToFoundSlot(int hotbarSlot, EquipmentItem item)
         {
             hotbarSlots[hotbarSlot].heldItem = item;
+            // Get Hud
             hotbarSlots[hotbarSlot].slot.UpdateSlotIcons(item.iconImage);
 
             int previousScrollValue = currentScrollValue;
@@ -261,7 +278,7 @@ namespace CallSOS.Player.Interaction
 
             UpdateUISlotHighlights(hotbarSlot, previousScrollValue);
 
-            PickupHeldItem(item);
+            PickupEquipmentItem(item);
         }
 
         /// <summary>
@@ -296,32 +313,40 @@ namespace CallSOS.Player.Interaction
         /// <summary>
         /// Move item from world to players hand
         /// </summary>
-        private void PickupHeldItem(EquipmentItem equipmentItem)
+        private void PickupEquipmentItem(EquipmentItem equipmentItem)
         {
-            equipmentItem.transform.SetParent(holdPostion);
-            equipmentItem.transform.position = Vector3.zero;
-            equipmentItem.transform.localPosition = equipmentItem.GetComponent<EquipmentItem>().holdPositionOffset;
-            equipmentItem.transform.rotation = holdPostion.rotation;
+            if (equipmentItem.isNetworked)
+            {
+                equipmentItem.networkedEquipment.NetworkedEquipmentInteractWith(holdParent, holdPosition, equipmentItem);
 
-            equipmentItem.isInInventory = true;
+                objectInHand = equipmentItem;
+            }
+            else
+            {
+                equipmentItem.transform.SetParent(holdParent);
+                equipmentItem.transform.position = Vector3.zero;
+                equipmentItem.transform.localPosition = equipmentItem.holdPositionOffset;
+                equipmentItem.transform.rotation = holdPosition.rotation;
 
-            if (equipmentItem.GetComponent<Rigidbody>() != null)
-                equipmentItem.GetComponent<Rigidbody>().isKinematic = true;
+                equipmentItem.isInInventory = true;
 
-            if (equipmentItem.GetComponent<Collider>() != null)
-                equipmentItem.GetComponent<Collider>().enabled = false;
+                if (equipmentItem.GetComponent<Rigidbody>() != null)
+                    equipmentItem.GetComponent<Rigidbody>().isKinematic = true;
 
-            objectInHand = equipmentItem;
-            objectInHand.action.UpdateIsInHand(true);
+                if (equipmentItem.GetComponent<Collider>() != null)
+                    equipmentItem.GetComponent<Collider>().enabled = false;
+
+                objectInHand = equipmentItem;
+
+                equipmentItem.action.UpdateIsInHand(true);
+            }
         }
 
         /// <summary>
         /// Remove held item from hotbar and set it back to the world
         /// </summary>
-        internal void DropHeldItem()
+        internal void DropEquipmentItem()
         {
-            if (objectInHand == null) return;
-
             EquipmentItem equipmentItem = hotbarSlots[currentScrollValue].heldItem;
 
             if (equipmentItem == null)
@@ -330,20 +355,29 @@ namespace CallSOS.Player.Interaction
                 return;
             }
 
-            hotbarSlots[currentScrollValue].heldItem = null;
-            hotbarSlots[currentScrollValue].slot.DisableSlotIcons();
+            if (equipmentItem.isNetworked)
+            {
 
-            equipmentItem.transform.parent = worldHeldItemParent;
-            equipmentItem.isInInventory = false;
+            }
+            else
+            {
+                hotbarSlots[currentScrollValue].heldItem = null;
+                hotbarSlots[currentScrollValue].slot.DisableSlotIcons();
 
-            if (equipmentItem.GetComponent<Rigidbody>() != null)
-                equipmentItem.GetComponent<Rigidbody>().isKinematic = false;
+                equipmentItem.transform.parent = worldHeldItemParent;
+                equipmentItem.isInInventory = false;
 
-            if (equipmentItem.GetComponent<Collider>() != null)
-                equipmentItem.GetComponent<Collider>().enabled = true;
+                if (equipmentItem.GetComponent<Rigidbody>() != null)
+                    equipmentItem.GetComponent<Rigidbody>().isKinematic = false;
 
-            objectInHand.action.UpdateIsInHand(false);
-            objectInHand = null;
+                if (equipmentItem.GetComponent<Collider>() != null)
+                    equipmentItem.GetComponent<Collider>().enabled = true;
+
+                objectInHand.action.UpdateIsInHand(false);
+                objectInHand = null;
+            }
+            
+
         }
 
         IEnumerator ScrollCooldownTimer()
@@ -357,64 +391,66 @@ namespace CallSOS.Player.Interaction
 
         internal void UpdateResourceList()
         {
-            foreach (Transform child in UIinvObjectHolder)
+            foreach (Transform child in UIInvObjectHolder)
                 Destroy(child.gameObject);
 
             foreach (ResourceObject inventoryObject in resourceObjects)
             {
-                GameObject obj = Instantiate(UIInvObjectPrefab, UIinvObjectHolder);
+                GameObject obj = Instantiate(UIInvObjectPrefab, UIInvObjectHolder);
                 obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = inventoryObject.item.itemName + " - " + inventoryObject.amount;
-                obj.GetComponent<Button>().onClick.AddListener(delegate { DropResourceItem(inventoryObject.item); });
+                obj.GetComponent<Button>().onClick.AddListener(delegate { DropOneResourceItem(inventoryObject.item); });
             }
         }
 
         internal void ToggleResourceUI()
         {
-            if(invPanel == null)
+            if(invPanelBackground == null)
             {
                 Debug.LogWarning("invPanel not found");
                 return;
             }
 
-            if (invPanel.activeSelf)
+            if (invPanelBackground.activeSelf)
             {
-                invPanel.SetActive(false);
+                invPanelBackground.SetActive(false);
                 //crosshair.SetActive(true);
                 //Cursor.lockState = CursorLockMode.Locked;
                 //Cursor.visible = false;
             }
-            else if (!invPanel.activeSelf)
+            else if (!invPanelBackground.activeSelf)
             {
 
                 UpdateResourceList();
-                invPanel.SetActive(true);
+                invPanelBackground.SetActive(true);
                 //crosshair.SetActive(false);
                 //Cursor.lockState = CursorLockMode.None;
                 //Cursor.visible = true;
             }
         }
 
-        internal void AddResource(ItemSO newItem)
+        internal void AddResource(ResourceItem newItem)
         {
             foreach (ResourceObject inventoryObject in resourceObjects)
             {
-                if (inventoryObject.item == newItem)
+                if (inventoryObject.item == newItem.itemScriptable)
                 {
                     inventoryObject.amount++;
+                    inventoryObject.isNetworked = newItem.isNetworked;
                     return;
                 }
             }
 
-            resourceObjects.Add(new ResourceObject() { item = newItem, amount = 1 });
+            resourceObjects.Add(new ResourceObject() { item = newItem.itemScriptable, amount = 1, isNetworked = newItem.isNetworked});
         }
 
-        void DropResourceItem(ItemSO item)
+        void DropOneResourceItem(ItemSO item)
         {
             foreach (ResourceObject resourceObject in resourceObjects)
             {
                 if (resourceObject.item != item)
                     continue;
 
+                // If there is more than one item, only drop one from the list
                 if (resourceObject.amount > 1)
                 {
                     resourceObject.amount--;
@@ -423,6 +459,7 @@ namespace CallSOS.Player.Interaction
                     return;
                 }
 
+                // If there is only one item left, remove it from the inventory list.
                 if (resourceObject.amount <= 1)
                 {
                     resourceObjects.Remove(resourceObject);
@@ -435,11 +472,45 @@ namespace CallSOS.Player.Interaction
 
         void DropResource(ResourceObject itemSO, Vector3 position)
         {
-            GameObject drop = Instantiate(itemSO.item.prefab, position, Quaternion.identity, worldHeldItemParent);
-            drop.name = itemSO.item.name;
-            drop.GetComponent<ResourceItem>().itemScriptable.interactText = itemSO.item.interactText;
+            if (itemSO.isNetworked)
+            {
+                DropResourceServerRpc(itemSO, position);
+            }
+            else
+            {
+                GameObject drop = Instantiate(itemSO.item.prefab, position, Quaternion.identity, worldHeldItemParent);
+                drop.name = itemSO.item.name;
+
+                ResourceItem resourceItem = drop.GetComponent<ResourceItem>();
+
+                if (resourceItem != null)
+                {
+                    resourceItem.itemScriptable.interactText = itemSO.item.interactText;
+                }
+            }
         }
+
+
+        [ServerRpc]
+        void DropResourceServerRpc(ResourceObject itemSO, Vector3 position)
+        {
+            GameObject drop = Instantiate(itemSO.item.prefab, position, Quaternion.identity);
+
+            ServerManager.Spawn(drop);
+
+
+            ResourceItem resourceItem = drop.GetComponent<ResourceItem>();
+
+            if (resourceItem != null)
+            {
+                resourceItem.itemScriptable.interactText = itemSO.item.interactText;
+            }
+
+            drop.name = "Pink:";
+        }
+
 #endregion
+
     }
 
     [System.Serializable]
@@ -447,5 +518,6 @@ namespace CallSOS.Player.Interaction
     {
         public ItemSO item;
         public int amount;
+        public bool isNetworked;
     }
 }

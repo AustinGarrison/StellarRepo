@@ -37,7 +37,7 @@ namespace Michsky.UI.Heat
 
         public enum CursorVisibility { Default, Invisible, Visible }
 
-        void Awake()
+        public void Initialize()
         {
             if (pauseMenuCanvas == null)
             {
@@ -66,6 +66,7 @@ namespace Michsky.UI.Heat
                 AnimatePauseMenu();
             }
         }
+
         private void TogglePlayerState()
         {
             OnPauseToggle.Invoke(this, EventArgs.Empty);

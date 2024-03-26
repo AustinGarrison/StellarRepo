@@ -14,6 +14,10 @@ namespace CallSOS.Player.Interaction.Equipment
         public bool isInHand ;
         public bool debugOffest = false;
 
+        [Space(5)]
+        public bool isNetworked;
+        [SerializeField] internal NetworkedInteractItem networkedEquipment;
+
         internal EquipmentActions action;
 
         internal string mainActionText;
@@ -46,14 +50,13 @@ namespace CallSOS.Player.Interaction.Equipment
             }
         }
 
-
         private string GetKeyDictionary(InputAction mainInputAction)
         {
             string bindingPath = mainInputAction.bindings[0].path;
             
             string label = "";
 
-            if (InputDictionary.Instance.PCKeyLabels.TryGetValue(bindingPath, out label))
+            if (InputsDictionary.PCKeyLabels.TryGetValue(bindingPath, out label))
             {
                 return label;
             }
@@ -66,7 +69,10 @@ namespace CallSOS.Player.Interaction.Equipment
 
         public override void InteractWith()//InteractControllerLocal player)
         {
-            Debug.Log("HoldItem/InteractWith");
+            Debug.Log("EquipmentItem/InteractWith");
+
+            if (isNetworked && networkedEquipment != null)
+                networkedEquipment.NetworkedInteractWith();
         }
 
         public CursorType GetCursorType()

@@ -1,7 +1,6 @@
-using KinematicCharacterController;
-using KinematicCharacterController.Examples;
 using System;
 using UnityEngine;
+using FishNet.Object;
 
 public class GameInputPlayer : MonoBehaviour
 {
@@ -30,7 +29,7 @@ public class GameInputPlayer : MonoBehaviour
 
     private PlayerInputActions playerInputActions;
 
-    private void Awake()
+    internal void Initialize()
     {
         if (Instance != null)
         {
@@ -53,9 +52,7 @@ public class GameInputPlayer : MonoBehaviour
         playerInputActions.Player.Sprint.performed += Sprint_performed;
         playerInputActions.Player.Sprint.canceled += Sprint_canceled;
         playerInputActions.Player.Click.performed += Click_performed;
-
     }
-
 
     private void Sprint_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
@@ -120,8 +117,9 @@ public class GameInputPlayer : MonoBehaviour
         return input;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
+
         playerInputActions.Player.Jump.performed -= Jump_performed;
         playerInputActions.Player.Interact.performed -= Interact_performed;
         playerInputActions.Player.AltInteract.performed -= Interact_performed;
@@ -133,8 +131,8 @@ public class GameInputPlayer : MonoBehaviour
         playerInputActions.Player.Click.performed -= Click_performed;
 
         playerInputActions.Dispose();
+        
     }
-
 
     public Vector2 GetMovementVectorNormalized()
     {

@@ -4,18 +4,22 @@ using CallSOS.Utilities;
 using Michsky.UI.Heat;
 using TMPro;
 using UnityEngine;
+using static CallSOS.Player.Interaction.InventoryController;
 
 namespace CallSOS.Player.UI
 {
     public class PlayerHudManager : MonoBehaviour
     {
-        [SerializeField] private TopDownPlayerController topDownPlayerController;
         [SerializeField] private ObjectInteractController interactController;
-        [SerializeField] private InventoryController inventoryController;
         [SerializeField] private ProgressBar staminaBar;
-
         [SerializeField] private string interactKeyText;
-        
+        [SerializeField] internal GameObject invPanelBackground;
+        [SerializeField] internal Transform UIInvObjectHolder;
+
+        [SerializeField] internal NetworkedTopDownPlayerController topDownPlayerController;
+        internal InventoryController inventoryController;
+        public InventorySlotInfo[] hotbarSlots = new InventorySlotInfo[0];
+   
         [Header("Cursor Text")]
         [SerializeField] private TextMeshProUGUI interactText;
         [SerializeField] private RectTransform interactTextParent;
@@ -27,11 +31,10 @@ namespace CallSOS.Player.UI
 
         [SerializeField] internal EquipmentItem objectInHand;
 
-
         private float startingStaminaValue = 100f;
         private float depleatedStaminaValue = 0f;
 
-        private void Start()
+        internal void Initialize()
         {
             staminaBar.currentValue = startingStaminaValue;
             interactText.gameObject.SetActive(false);
@@ -100,7 +103,6 @@ namespace CallSOS.Player.UI
 
         private void FixedUpdate()
         {
-            //float sprintTimer = playerController._timeSinceSprintStarted / playerController.MaxSprintDuration;
             float sprintTimer = topDownPlayerController._timeSinceSprintStarted / topDownPlayerController.MaxSprintDuration;
             float remainingSprint = Mathf.Lerp(startingStaminaValue, depleatedStaminaValue, sprintTimer);
 

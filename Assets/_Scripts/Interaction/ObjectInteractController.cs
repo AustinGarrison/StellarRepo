@@ -1,5 +1,7 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.Interaction.Equipment;
+using FishNet;
+using FishNet.Object;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -54,6 +56,7 @@ namespace CallSOS.Utilities
 
         public void Initialize()
         {
+            enabled = true;
             GameInputPlayer.Instance.OnClickAction += Instance_OnClickAction;           
             isInitialized = true;
         }
@@ -72,7 +75,7 @@ namespace CallSOS.Utilities
         {
             if (!isInitialized) return;
             if (InteractWithUI()) return;
-            if (InteractWithComponent3D()) return;
+            if (InteractWithWorldItem()) return;
             CursorController.Instance.SetCursor(CursorType.None);
         }
 
@@ -87,8 +90,7 @@ namespace CallSOS.Utilities
 
             return false;
         }
-
-        private bool InteractWithComponent3D()
+        private bool InteractWithWorldItem()
         {
             RaycastHit[] hits = RaycastAllSorted3D();
 
@@ -97,7 +99,7 @@ namespace CallSOS.Utilities
                 IRaycastable[] raycastables = hit.transform.GetComponents<IRaycastable>();
                 foreach (IRaycastable raycastable in raycastables)
                 {
-                    if(raycastable.CanHandleRaycast(this))
+                    if (raycastable.CanHandleRaycast(this))
                     {
                         CursorController.Instance.SetCursor(raycastable.GetCursorType());
 
@@ -148,7 +150,7 @@ namespace CallSOS.Utilities
                     itemInteractTypeText = interactItem.itemScriptable.localizationKey;
                     break;
 
-                case InteractType.InventoryItem:
+                case InteractType.ResourceItem:
                     itemInteractTypeText = interactItem.itemScriptable.localizationKey;
                     break;
 
@@ -157,6 +159,7 @@ namespace CallSOS.Utilities
             OnInteractTextEvent?.Invoke(this, new ChangeTextEvent(itemInteractTypeText));
         }
 
+        
         private void InteractWithItem(InteractItem interactItem)
         {
             attemptItemPickup = false;
@@ -169,10 +172,10 @@ namespace CallSOS.Utilities
                         InteractWithOperationItem(interactItem);
                         break;
                     case InteractType.HoldItem:
-                        InteractWithHoldItem(interactItem);
+                        InteractWithEquipmentItem(interactItem);
                         break;
-                    case InteractType.InventoryItem:
-                        InteractWithInventoryItem(interactItem);
+                    case InteractType.ResourceItem:
+                        InteractWithResourceItem(interactItem);
                         break;
                     default:
                         Debug.LogError("No interaction type found in Hit");
@@ -190,37 +193,36 @@ namespace CallSOS.Utilities
             }
         }
 
-        private void InteractWithHoldItem(InteractItem interactItem)
+        private void InteractWithEquipmentItem(InteractItem interactItem)
         {
             EquipmentItem equipmentItem = interactItem.GetComponent<EquipmentItem>();
 
             if (equipmentItem != null)
             {
-                equipmentItem.InteractWith();
                 OnEquipmentItemInteract?.Invoke(this, new EquipmentItemEventArgs(equipmentItem));
+                equipmentItem.InteractWith();
             }
             else
             {
-                Debug.LogWarning("Failed to get hold Item");
+                Debug.LogWarning("Failed to get Equipment Item");
             }
         }
 
-        private void InteractWithInventoryItem(InteractItem interactItem)
+        private void InteractWithResourceItem(InteractItem interactItem)
         {
-            //if (hit.transform.GetComponent<InventoryItem>() == null)
-            //    return;
-            ResourceItem inventoryItem = interactItem.GetComponent<ResourceItem>();
+            ResourceItem resourceItem = interactItem.GetComponent<ResourceItem>();
 
-            if (inventoryItem != null)
+            if (resourceItem != null)
             {
-                inventoryItem.InteractWith();
-                OnResourceItemInteract?.Invoke(this, new ResourceItemEventArgs(inventoryItem));
-
-                // Despawn Object
-                Destroy(interactItem.transform.gameObject);
+                OnResourceItemInteract?.Invoke(this, new ResourceItemEventArgs(resourceItem));
+                resourceItem.InteractWith();
+            }
+            else
+            {
+                Debug.LogWarning("Failed to get Resource Item");
             }
         }
-
+        
         RaycastHit[] RaycastAllSorted3D()
         {
             RaycastHit[] hits = Physics.SphereCastAll(GetMouseRay(), raycastRadius);
