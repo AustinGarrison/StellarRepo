@@ -15,19 +15,21 @@ namespace CallSOS.Player
         [SerializeField] private NetworkedTopDownPlayerController playerController;
         [SerializeField] private InventoryController inventoryController;
         [SerializeField] private AudioListener audioListener;
-        [SerializeField] private CursorCameraTarget cameraTarget;
         [SerializeField] private GameObject PauseMenuPrefab;
         [SerializeField] private GameObject PlayerMesh;
         [SerializeField] private GameObject playerExtrasPrefab;
 
-        private Camera playerCamera;
         private CinemachineVirtualCamera virtualCamera;
 
         private PlayerExtraSpawner extraSpawner;
+        //private CursorCameraTarget cameraTarget;
         private ObjectInteractController interactController;
         private PlayerSoundManager soundManager;
-        private PlayerHudManager hudManager;
+        [SerializeField] private PlayerHudManager hudManager;
         private GameInputPlayer playerInput;
+
+        //Delete
+        private CameraFollowTarget cameraFollow;
 
         public override void OnStartClient()
         {
@@ -59,29 +61,43 @@ namespace CallSOS.Player
                 soundManager = extraSpawner.soundManager;
                 hudManager = extraSpawner.hudManager;
                 playerInput = extraSpawner.playerInput;
-                playerCamera = extraSpawner.playerCamera;
                 virtualCamera = extraSpawner.virtualCamera;
+                cameraFollow = extraSpawner.cameraFollow;
             }
 
             Destroy(extraSpawner);
 
-            cameraTarget.playerCamera = playerCamera;
-            virtualCamera.Follow = cameraTarget.transform;
+            if (cameraFollow != null)
+            {
+                cameraFollow.player = playerController.transform;
+            }
 
-            playerInput.Initialize();
+            if (virtualCamera != null)
+                virtualCamera.Follow = cameraFollow.transform;
+
+            if(playerInput != null)
+                playerInput.Initialize();
 
             GameObject pauseMenu = Instantiate(PauseMenuPrefab);
             playerController.SubscribedEvents(pauseMenu.GetComponentInChildren<PauseMenuManager>());
 
-            if (interactController != null) interactController.Initialize();
+            if (interactController != null)
+                interactController.Initialize();
 
-            inventoryController.interactController = interactController;
-            inventoryController.enabled = true;
-            if (inventoryController != null) inventoryController.Initialize();
+            if(inventoryController != null)
+            {
+                inventoryController.interactController = interactController;
+                inventoryController.enabled = true;
+            }
 
-            if (soundManager != null) soundManager.Init();
+            if (inventoryController != null) 
+                inventoryController.Initialize();
 
-            if (audioListener != null) audioListener.enabled = true;
+            if (soundManager != null)
+                soundManager.Init();
+
+            if (audioListener != null)
+                audioListener.enabled = true;
 
             if (hudManager != null)
             {
@@ -90,6 +106,9 @@ namespace CallSOS.Player
                 hudManager.inventoryController = inventoryController;
                 hudManager.enabled = true;
                 hudManager.Initialize();
+
+                inventoryController.invPanelBackground = hudManager.invPanelBackground;
+                inventoryController.UIInvObjectHolder = hudManager.UIInvObjectHolder;
             }
 
             Destroy(this);

@@ -29,8 +29,8 @@ namespace CallSOS.Player.Interaction
         [Header("HUD")]
         [SerializeField] private GameObject crosshair;
         [SerializeField] private GameObject UIInvObjectPrefab;
-        [SerializeField] private GameObject invPanel;
-        [SerializeField] private Transform UIinvObjectHolder;
+        [SerializeField] internal GameObject invPanelBackground;
+        [SerializeField] internal Transform UIInvObjectHolder;
 
         [Header("Resource and Equipment Holders")]
         public List<ResourceObject> resourceObjects = new List<ResourceObject>();
@@ -95,7 +95,7 @@ namespace CallSOS.Player.Interaction
         internal void Initialize()
         {
             //Turns off inventory if its on
-            if (invPanel != null && invPanel.activeSelf)
+            if (invPanelBackground != null && invPanelBackground.activeSelf)
                 ToggleResourceUI();
 
             //Toggle Inventory Screen
@@ -391,12 +391,12 @@ namespace CallSOS.Player.Interaction
 
         internal void UpdateResourceList()
         {
-            foreach (Transform child in UIinvObjectHolder)
+            foreach (Transform child in UIInvObjectHolder)
                 Destroy(child.gameObject);
 
             foreach (ResourceObject inventoryObject in resourceObjects)
             {
-                GameObject obj = Instantiate(UIInvObjectPrefab, UIinvObjectHolder);
+                GameObject obj = Instantiate(UIInvObjectPrefab, UIInvObjectHolder);
                 obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = inventoryObject.item.itemName + " - " + inventoryObject.amount;
                 obj.GetComponent<Button>().onClick.AddListener(delegate { DropOneResourceItem(inventoryObject.item); });
             }
@@ -404,24 +404,24 @@ namespace CallSOS.Player.Interaction
 
         internal void ToggleResourceUI()
         {
-            if(invPanel == null)
+            if(invPanelBackground == null)
             {
                 Debug.LogWarning("invPanel not found");
                 return;
             }
 
-            if (invPanel.activeSelf)
+            if (invPanelBackground.activeSelf)
             {
-                invPanel.SetActive(false);
+                invPanelBackground.SetActive(false);
                 //crosshair.SetActive(true);
                 //Cursor.lockState = CursorLockMode.Locked;
                 //Cursor.visible = false;
             }
-            else if (!invPanel.activeSelf)
+            else if (!invPanelBackground.activeSelf)
             {
 
                 UpdateResourceList();
-                invPanel.SetActive(true);
+                invPanelBackground.SetActive(true);
                 //crosshair.SetActive(false);
                 //Cursor.lockState = CursorLockMode.None;
                 //Cursor.visible = true;

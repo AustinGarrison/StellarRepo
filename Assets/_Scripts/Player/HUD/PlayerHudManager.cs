@@ -1,7 +1,6 @@
 using CallSOS.Player.Interaction;
 using CallSOS.Player.Interaction.Equipment;
 using CallSOS.Utilities;
-using FishNet.Object;
 using Michsky.UI.Heat;
 using TMPro;
 using UnityEngine;
@@ -11,14 +10,16 @@ namespace CallSOS.Player.UI
 {
     public class PlayerHudManager : MonoBehaviour
     {
-        internal NetworkedTopDownPlayerController topDownPlayerController;
-        internal InventoryController inventoryController;
         [SerializeField] private ObjectInteractController interactController;
         [SerializeField] private ProgressBar staminaBar;
-        public InventorySlotInfo[] hotbarSlots = new InventorySlotInfo[0];
-
         [SerializeField] private string interactKeyText;
-        
+        [SerializeField] internal GameObject invPanelBackground;
+        [SerializeField] internal Transform UIInvObjectHolder;
+
+        [SerializeField] internal NetworkedTopDownPlayerController topDownPlayerController;
+        internal InventoryController inventoryController;
+        public InventorySlotInfo[] hotbarSlots = new InventorySlotInfo[0];
+   
         [Header("Cursor Text")]
         [SerializeField] private TextMeshProUGUI interactText;
         [SerializeField] private RectTransform interactTextParent;
